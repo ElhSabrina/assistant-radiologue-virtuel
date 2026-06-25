@@ -24,3 +24,7 @@ assets/
 
 # Local duplicate; the shareable PDF lives in docs/appel_offre.pdf
 /appel_offre.pdf
+
+# Notes locales (non partagées)
+RECAP_SESSION_ETAPE2.md
+EXPLICATION_inference.md
