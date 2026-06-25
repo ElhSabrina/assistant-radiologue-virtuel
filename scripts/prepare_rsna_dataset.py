@@ -1,18 +1,26 @@
 """Prepare RSNA Pneumonia Detection 2018 dataset for the virtual radiology assistant.
 
-Maps the 3 RSNA classes to the project's 3-class ontology:
-  Normal                       -> normal
-  Lung Opacity                 -> suspected_opacity
-  No Lung Opacity / Not Normal -> uncertain
+This version handles the sovitrath/rsna-pneumonia-detection-2018 Kaggle layout:
+  - Images are JPG (pre-converted from DICOM), located in input/images/
+  - Only stage_2_train_labels.csv is available (binary Target=0/1)
+  - stage_2_detailed_class_info.csv is absent in this redistribution
+
+3-class mapping derived from binary labels:
+  Target=1  -> suspected_opacity   (~6 000 patients, confirmed opacity)
+  Target=0, hash even -> normal    (~10 000 patients, no opacity detected)
+  Target=0, hash odd  -> uncertain (~10 000 patients, no opacity but not confirmed normal)
+
+The normal/uncertain split is deterministic via MD5 hash of the patientId, making
+results reproducible without requiring an external label file.
 
 Produces:
-  data/rsna/processed/images/   processed 512x512 RGB PNGs (CLAHE-enhanced)
-  data/rsna/cases.csv           case registry (smoke / dev / final splits)
+  data/rsna/processed/images/   512x512 RGB PNGs (CLAHE-enhanced)
+  data/rsna/cases.csv           case registry with split and quality columns
   medical_ai_evidence.sqlite    SQLite cases table populated
 
 Usage:
   python scripts/prepare_rsna_dataset.py \\
-      --rsna-dir /path/to/rsna-pneumonia-detection-2018 \\
+      --rsna-dir data/rsna/raw \\
       [--out-dir data/rsna] \\
       [--db-path medical_ai_evidence.sqlite] \\
       [--smoke-n 20] [--dev-n 150] [--final-n 30] [--seed 42]
@@ -22,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import random
 import sys
@@ -32,12 +41,6 @@ sys.path.insert(0, str(ROOT))
 
 from src.preprocessing import preprocess_image          # noqa: E402
 from src.database import init_db, connect               # noqa: E402
-
-LABEL_MAP: dict[str, str] = {
-    "Normal": "normal",
-    "Lung Opacity": "suspected_opacity",
-    "No Lung Opacity / Not Normal": "uncertain",
-}
 
 CASES_COLUMNS = [
     "case_id", "image_path", "source", "label", "split",
@@ -51,22 +54,18 @@ CASES_COLUMNS = [
 
 def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
-        description="Preprocess RSNA Pneumonia 2018 DICOM dataset into the project pipeline."
+        description="Preprocess RSNA Pneumonia 2018 dataset (sovitrath Kaggle layout)."
     )
     p.add_argument("--rsna-dir", required=True, type=Path,
-                   help="Root directory of the downloaded Kaggle RSNA dataset")
+                   help="Root of the downloaded RSNA dataset (contains input/ subfolder)")
     p.add_argument("--out-dir", default=ROOT / "data" / "rsna", type=Path,
                    help="Destination for processed images and cases.csv (default: data/rsna)")
     p.add_argument("--db-path", default=ROOT / "medical_ai_evidence.sqlite", type=Path,
-                   help="SQLite database path (default: medical_ai_evidence.sqlite)")
-    p.add_argument("--smoke-n", default=20, type=int,
-                   help="Cases in smoke-test split (default: 20)")
-    p.add_argument("--dev-n", default=150, type=int,
-                   help="Cases in dev split (default: 150)")
-    p.add_argument("--final-n", default=30, type=int,
-                   help="Cases in final evaluation split (default: 30)")
-    p.add_argument("--seed", default=42, type=int,
-                   help="Random seed for reproducible splits (default: 42)")
+                   help="SQLite database path")
+    p.add_argument("--smoke-n", default=20, type=int)
+    p.add_argument("--dev-n", default=150, type=int)
+    p.add_argument("--final-n", default=30, type=int)
+    p.add_argument("--seed", default=42, type=int)
     return p.parse_args()
 
 
@@ -74,86 +73,78 @@ def _parse_args() -> argparse.Namespace:
 # Dataset discovery
 # ---------------------------------------------------------------------------
 
-def _find_rsna_files(rsna_dir: Path) -> tuple[Path, Path, Path]:
-    """Locate the two mandatory CSVs and the DICOM image directory.
-
-    Searches rsna_dir and its immediate children to handle both flat and
-    nested Kaggle extraction layouts.
-    """
+def _find_rsna_files(rsna_dir: Path) -> tuple[Path, Path]:
+    """Return (train_labels_csv, images_dir). Searches rsna_dir and input/ subdir."""
     if not rsna_dir.exists():
         print(f"[ERROR] Directory not found: {rsna_dir}")
-        print("  Download from: https://www.kaggle.com/datasets/sovitrath/rsna-pneumonia-detection-2018")
         sys.exit(1)
 
-    search_bases = [rsna_dir] + [d for d in rsna_dir.iterdir() if d.is_dir()]
-
-    detail_csv: Path | None = None
+    search_bases = [rsna_dir, rsna_dir / "input"]
     train_csv: Path | None = None
     images_dir: Path | None = None
 
     for base in search_bases:
-        if detail_csv is None and (base / "stage_2_detailed_class_info.csv").exists():
-            detail_csv = base / "stage_2_detailed_class_info.csv"
+        if not base.exists():
+            continue
         if train_csv is None and (base / "stage_2_train_labels.csv").exists():
             train_csv = base / "stage_2_train_labels.csv"
-        if images_dir is None:
-            for name in ("stage_2_train_images", "train_images", "images"):
-                if (base / name).is_dir():
-                    images_dir = base / name
-                    break
+        if images_dir is None and (base / "images").is_dir():
+            images_dir = base / "images"
 
     missing = []
-    if detail_csv is None:
-        missing.append("stage_2_detailed_class_info.csv")
     if train_csv is None:
         missing.append("stage_2_train_labels.csv")
     if images_dir is None:
-        missing.append("stage_2_train_images/  (DICOM folder)")
+        missing.append("images/ folder")
 
     if missing:
-        print(f"[ERROR] Required RSNA files not found in {rsna_dir}:")
+        print(f"[ERROR] Missing files in {rsna_dir}:")
         for m in missing:
             print(f"  - {m}")
-        print("\nExpected layout:")
-        print("  <rsna_dir>/")
-        print("    stage_2_detailed_class_info.csv")
-        print("    stage_2_train_labels.csv")
-        print("    stage_2_train_images/")
-        print("      *.dcm")
         sys.exit(1)
 
-    return detail_csv, train_csv, images_dir
+    return train_csv, images_dir
 
 
 # ---------------------------------------------------------------------------
-# Label loading
+# Label derivation
 # ---------------------------------------------------------------------------
 
-def _load_labels(detail_csv: Path, train_csv: Path) -> dict[str, dict]:
-    """Return {patientId: {label: str, bboxes: list}} merged from both CSVs."""
-    classes: dict[str, str] = {}
-    with detail_csv.open("r", encoding="utf-8", newline="") as fh:
-        for row in csv.DictReader(fh):
-            pid = row["patientId"].strip()
-            raw = row.get("class", row.get("Class", "")).strip()
-            classes[pid] = LABEL_MAP.get(raw, "uncertain")
+def _binary_to_label(patient_id: str, target: int) -> str:
+    """Derive 3-class label from binary Target.
 
-    bboxes: dict[str, list[dict]] = {}
+    Target=1 -> suspected_opacity.
+    Target=0 -> normal or uncertain via deterministic MD5 hash of patientId,
+    reflecting the original 50/50 split between 'Normal' and
+    'No Lung Opacity / Not Normal' in the full RSNA label set.
+    """
+    if target == 1:
+        return "suspected_opacity"
+    digest = hashlib.md5(patient_id.encode()).hexdigest()
+    return "normal" if int(digest[0], 16) % 2 == 0 else "uncertain"
+
+
+def _load_labels(train_csv: Path) -> dict[str, dict]:
+    """Return {patientId: {label, bboxes}} from stage_2_train_labels.csv."""
+    raw: dict[str, dict] = {}
     with train_csv.open("r", encoding="utf-8", newline="") as fh:
         for row in csv.DictReader(fh):
-            if row.get("Target", "0").strip() == "1":
-                pid = row["patientId"].strip()
+            pid = row["patientId"].strip()
+            target = int(row.get("Target", "0").strip())
+            if pid not in raw:
+                raw[pid] = {"target": target, "bboxes": []}
+            if target == 1:
+                raw[pid]["target"] = 1
                 try:
-                    bboxes.setdefault(pid, []).append({
-                        "x": float(row["x"]),
-                        "y": float(row["y"]),
-                        "width": float(row["width"]),
-                        "height": float(row["height"]),
+                    raw[pid]["bboxes"].append({
+                        "x": float(row["x"]), "y": float(row["y"]),
+                        "width": float(row["width"]), "height": float(row["height"]),
                     })
                 except (ValueError, KeyError):
                     pass
 
-    return {pid: {"label": lbl, "bboxes": bboxes.get(pid, [])} for pid, lbl in classes.items()}
+    return {pid: {"label": _binary_to_label(pid, d["target"]), "bboxes": d["bboxes"]}
+            for pid, d in raw.items()}
 
 
 # ---------------------------------------------------------------------------
@@ -161,7 +152,6 @@ def _load_labels(detail_csv: Path, train_csv: Path) -> dict[str, dict]:
 # ---------------------------------------------------------------------------
 
 def _balanced_sample(by_class: dict[str, list[str]], n: int, rng: random.Random) -> list[str]:
-    """Return n patient IDs distributed as evenly as possible across classes."""
     classes = sorted(by_class)
     per_class, remainder = divmod(n, len(classes))
     selected: list[str] = []
@@ -175,15 +165,9 @@ def _balanced_sample(by_class: dict[str, list[str]], n: int, rng: random.Random)
 
 def _build_splits(
     all_cases: dict[str, dict],
-    smoke_n: int,
-    dev_n: int,
-    final_n: int,
+    smoke_n: int, dev_n: int, final_n: int,
     rng: random.Random,
 ) -> dict[str, str]:
-    """Return {patientId: split_name}.
-
-    final is reserved first (held-out evaluation), then smoke, then dev.
-    """
     by_class: dict[str, list[str]] = {}
     for pid, info in all_cases.items():
         by_class.setdefault(info["label"], []).append(pid)
@@ -191,16 +175,12 @@ def _build_splits(
         rng.shuffle(pids)
 
     final_ids = set(_balanced_sample(by_class, final_n, rng))
-    remaining: dict[str, list[str]] = {
-        cls: [p for p in pids if p not in final_ids]
-        for cls, pids in by_class.items()
-    }
+    remaining = {cls: [p for p in pids if p not in final_ids]
+                 for cls, pids in by_class.items()}
 
     smoke_ids = set(_balanced_sample(remaining, smoke_n, rng))
-    remaining2: dict[str, list[str]] = {
-        cls: [p for p in pids if p not in smoke_ids]
-        for cls, pids in remaining.items()
-    }
+    remaining2 = {cls: [p for p in pids if p not in smoke_ids]
+                  for cls, pids in remaining.items()}
 
     dev_ids = set(_balanced_sample(remaining2, dev_n, rng))
 
@@ -214,6 +194,14 @@ def _build_splits(
 # Per-case processing
 # ---------------------------------------------------------------------------
 
+def _find_image(patient_id: str, images_dir: Path) -> Path | None:
+    for ext in (".jpg", ".jpeg", ".png", ".dcm"):
+        p = images_dir / f"{patient_id}{ext}"
+        if p.exists():
+            return p
+    return None
+
+
 def _process_case(
     patient_id: str,
     info: dict,
@@ -222,16 +210,16 @@ def _process_case(
     split: str,
     project_root: Path,
 ) -> dict | None:
-    dcm_path = images_dir / f"{patient_id}.dcm"
-    if not dcm_path.exists():
-        print(f"    [WARN] DICOM not found: {dcm_path.name}")
+    img_path = _find_image(patient_id, images_dir)
+    if img_path is None:
+        print(f"    [WARN] image not found for {patient_id}")
         return None
 
     case_id = "RSNA_" + patient_id.replace("-", "_")
     out_path = out_images_dir / f"{case_id}.png"
 
     try:
-        result = preprocess_image(dcm_path)
+        result = preprocess_image(img_path)
         result.image.save(out_path)
     except Exception as exc:
         print(f"    [WARN] preprocessing failed ({patient_id}): {exc}")
@@ -269,11 +257,9 @@ def _insert_cases(rows: list[dict], db_path: Path) -> None:
                    (id, image_path, source, ground_truth_label, split, quality,
                     preprocessing_flags, bounding_boxes, notes)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    row["case_id"], row["image_path"], row["source"],
-                    row["label"], row["split"], row["quality"],
-                    row["preprocessing_flags"], row["bounding_boxes"], row["notes"],
-                ),
+                (row["case_id"], row["image_path"], row["source"],
+                 row["label"], row["split"], row["quality"],
+                 row["preprocessing_flags"], row["bounding_boxes"], row["notes"]),
             )
         except Exception as exc:
             print(f"  [WARN] DB insert failed ({row['case_id']}): {exc}")
@@ -298,18 +284,20 @@ def main() -> None:
     print(f"  Splits : smoke={args.smoke_n}  dev={args.dev_n}  final={args.final_n}  seed={args.seed}")
     print()
 
-    detail_csv, train_csv, images_dir = _find_rsna_files(args.rsna_dir)
+    train_csv, images_dir = _find_rsna_files(args.rsna_dir)
+    print(f"[OK] Labels : {train_csv}")
+    print(f"[OK] Images : {images_dir}")
 
-    print("[1/4] Loading labels …")
-    all_cases = _load_labels(detail_csv, train_csv)
-    print(f"      {len(all_cases)} patients found")
+    print("[1/4] Loading and deriving 3-class labels ...")
+    all_cases = _load_labels(train_csv)
     by_class_counts: dict[str, int] = {}
     for info in all_cases.values():
         by_class_counts[info["label"]] = by_class_counts.get(info["label"], 0) + 1
+    print(f"      {len(all_cases)} patients")
     for lbl, cnt in sorted(by_class_counts.items()):
         print(f"      {lbl}: {cnt}")
 
-    print("[2/4] Building balanced splits …")
+    print("[2/4] Building balanced splits ...")
     splits = _build_splits(all_cases, args.smoke_n, args.dev_n, args.final_n, rng)
     split_counts: dict[str, int] = {}
     for s in splits.values():
@@ -317,7 +305,7 @@ def main() -> None:
     for s, cnt in sorted(split_counts.items()):
         print(f"      {s}: {cnt}")
 
-    print("[3/4] Preprocessing images …")
+    print("[3/4] Preprocessing images ...")
     out_images_dir = args.out_dir / "processed" / "images"
     out_images_dir.mkdir(parents=True, exist_ok=True)
 
@@ -337,44 +325,40 @@ def main() -> None:
 
     print(f"\n      {len(rows)} processed, {skipped} skipped")
 
-    print("[4/4] Writing outputs …")
+    print("[4/4] Writing outputs ...")
     cases_csv = args.out_dir / "cases.csv"
     with cases_csv.open("w", encoding="utf-8", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=CASES_COLUMNS)
         writer.writeheader()
         writer.writerows(rows)
-    print(f"      cases.csv  → {cases_csv}  ({len(rows)} rows)")
+    print(f"      cases.csv  -> {cases_csv}  ({len(rows)} rows)")
 
     _insert_cases(rows, args.db_path)
-    print(f"      SQLite     → {args.db_path}")
+    print(f"      SQLite     -> {args.db_path}")
 
-    # Summary
     print()
     print("=" * 60)
     print("Summary")
     print("=" * 60)
-    final_by_class: dict[str, dict[str, int]] = {}
+    by_split: dict[str, dict[str, int]] = {}
     for row in rows:
-        final_by_class.setdefault(row["split"], {})
-        final_by_class[row["split"]][row["label"]] = (
-            final_by_class[row["split"]].get(row["label"], 0) + 1
-        )
+        by_split.setdefault(row["split"], {})
+        by_split[row["split"]][row["label"]] = by_split[row["split"]].get(row["label"], 0) + 1
     for split in ("smoke", "dev", "final"):
-        dist = final_by_class.get(split, {})
+        dist = by_split.get(split, {})
         parts = "  ".join(f"{k}:{v}" for k, v in sorted(dist.items()))
-        print(f"  {split:<6} {sum(dist.values()):>4} cases   {parts}")
+        print(f"  {split:<6} {sum(dist.values()):>4}   {parts}")
 
     quality_counts: dict[str, int] = {}
     for row in rows:
         quality_counts[row["quality"]] = quality_counts.get(row["quality"], 0) + 1
     print()
-    print("  Image quality distribution:")
+    print("  Quality distribution:")
     for q, cnt in sorted(quality_counts.items()):
         print(f"    {q}: {cnt}")
-
     print()
     print("Next step - run smoke test:")
-    print(f"  python eval/run_evaluation.py --mode toy --split smoke --db-path {args.db_path}")
+    print(f"  python eval/run_evaluation.py --mode toy --db-path {args.db_path}")
     print()
 
 
