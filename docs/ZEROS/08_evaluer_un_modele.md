@@ -1,4 +1,4 @@
-# 08 — Évaluer un modèle : comment savoir si ça marche vraiment
+﻿# 08 - Évaluer un modèle : comment savoir si ça marche vraiment
 
 ## Le piège de l'accuracy
 

@@ -1,4 +1,4 @@
-# 04 — Le modèle MedGemma
+﻿# 04 - Le modèle MedGemma
 
 ## Pourquoi ne pas juste utiliser ChatGPT ?
 
