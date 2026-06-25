@@ -290,7 +290,7 @@ def main() -> None:
     rng = random.Random(args.seed)
 
     print("=" * 60)
-    print("RSNA Pneumonia 2018 — dataset preprocessing")
+    print("RSNA Pneumonia 2018 - dataset preprocessing")
     print("=" * 60)
     print(f"  Source : {args.rsna_dir}")
     print(f"  Output : {args.out_dir}")
@@ -373,7 +373,7 @@ def main() -> None:
         print(f"    {q}: {cnt}")
 
     print()
-    print("Next step — run smoke test:")
+    print("Next step - run smoke test:")
     print(f"  python eval/run_evaluation.py --mode toy --split smoke --db-path {args.db_path}")
     print()
 

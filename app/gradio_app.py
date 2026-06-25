@@ -15,7 +15,7 @@ demo = gr.Interface(
     fn=analyze,
     inputs=[gr.Image(type="filepath", label="Radiographie thoracique"), gr.Radio(["baseline", "improved"], value="improved")],
     outputs=gr.JSON(label="Sortie structurée"),
-    title="Assistant radiologue virtuel — prototype pédagogique",
+    title="Assistant radiologue virtuel - prototype pédagogique",
     description="Non destiné au diagnostic. Validation par un professionnel qualifié requise.",
 )
 

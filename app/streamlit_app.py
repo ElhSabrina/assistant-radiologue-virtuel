@@ -9,7 +9,7 @@ from src.inference import toy_predict
 from src.guardrails import apply_safety_guardrails
 
 st.set_page_config(page_title="Assistant radiologue virtuel", layout="wide")
-st.title("Assistant radiologue virtuel — prototype pédagogique")
+st.title("Assistant radiologue virtuel - prototype pédagogique")
 st.warning("Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.")
 
 uploaded = st.file_uploader("Déposer une radiographie thoracique frontale", type=["png", "jpg", "jpeg"])
