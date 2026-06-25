@@ -9,11 +9,12 @@ eval/outputs/
 .env
 .DS_Store
 
-# RSNA dataset — DICOM bruts et images traitées (trop lourds, licence Kaggle)
+# RSNA dataset - DICOMs bruts et dossier raw exclus (licence Kaggle, trop lourds)
 *.dcm
 data/rsna/raw/
-data/rsna/processed/
-data/rsna/cases.csv
+
+# Les resultats du preprocessing (PNG traites + cases.csv) sont commites
+# data/rsna/processed/ et data/rsna/cases.csv sont INCLUS dans le repo
 
 # Local/professor visual material
 assets/
