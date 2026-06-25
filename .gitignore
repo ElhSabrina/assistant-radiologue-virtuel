@@ -14,6 +14,7 @@ eval/outputs/
 data/rsna/raw/
 data/rsna/processed/
 data/rsna/cases.csv
+data/rsna_pneumonia/
 
 # Local/professor visual material
 assets/
