@@ -1,4 +1,4 @@
-.venv/
+﻿.venv/
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -9,12 +9,12 @@ eval/outputs/
 .env
 .DS_Store
 
-# RSNA dataset - DICOMs bruts et dossier raw exclus (licence Kaggle, trop lourds)
+# RSNA dataset — DICOM bruts et images traitées (trop lourds, licence Kaggle)
 *.dcm
 data/rsna/raw/
-
-# Les resultats du preprocessing (PNG traites + cases.csv) sont commites
-# data/rsna/processed/ et data/rsna/cases.csv sont INCLUS dans le repo
+data/rsna/processed/
+data/rsna/cases.csv
+data/rsna_pneumonia/
 
 # Local/professor visual material
 assets/
@@ -24,3 +24,7 @@ assets/
 
 # Local duplicate; the shareable PDF lives in docs/appel_offre.pdf
 /appel_offre.pdf
+
+# Notes locales (non partagées)
+RECAP_SESSION_ETAPE2.md
+EXPLICATION_inference.md

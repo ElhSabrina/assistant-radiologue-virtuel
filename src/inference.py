@@ -1,13 +1,28 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
-from pathlib import Path
+import json
+import os
+import re
 import time
-from typing import Any
+from pathlib import Path
+from typing import Any, Callable
 
-from .preprocessing import basic_quality_flag
+import cv2
+import numpy as np
+
+from .preprocessing import PreprocessResult, basic_quality_flag, preprocess_image
 
 WARNING = "Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise."
 
+ALLOWED_CLASSES = ("normal", "suspected_opacity", "uncertain")
+_BASE_LIMITATIONS = ["no clinical context", "not a validated medical model"]
+_PROMPTS_DIR = Path(__file__).resolve().parents[1] / "prompts"
+
+
+# ---------------------------------------------------------------------------
+# Toy predictor — deterministic, filename-driven.
+# Kept for the CI smoke tests and `--mode toy`; it is NOT medical inference.
+# ---------------------------------------------------------------------------
 
 def toy_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any]:
     """Deterministic toy predictor used to validate the repo pipeline.
@@ -54,9 +69,277 @@ def toy_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any
     }
 
 
-def vlm_predict_placeholder(image_path: str | Path, prompt: str) -> dict[str, Any]:
-    """Placeholder for a Hugging Face / MedGemma / Gemma 4 VLM call.
+# ===========================================================================
+# Étape 2 — real baseline / improved predictors
+# ===========================================================================
+#
+# baseline_v1 : rule-based classifier on the quality metrics of PreprocessResult
+#               plus a focal-opacity image feature (Option A of the appel d'offre).
+# improved_v1 : MedGemma-4B vision-language model via Hugging Face Transformers
+#               (Option B), gated behind USE_MEDGEMMA and with an automatic
+#               rule-based fallback so the pipeline never breaks when the model,
+#               its weights or a HF token are not available (e.g. in CI).
+# ---------------------------------------------------------------------------
 
-    Students should keep the same output schema as toy_predict.
+# opacity_peak: contrast of the densest blob inside the lung-field ROI, expressed
+# in median-absolute-deviation (MAD) units. A focal pneumonic opacity appears as a
+# bright, dense blob -> high peak. These thresholds are calibrated on the synthetic
+# smoke set and MUST be re-tuned on the RSNA dev split in étape 3.
+_OPACITY_PEAK_THRESHOLD = 4.0
+_OPACITY_MARGIN = 0.45  # |peak - threshold| below this is treated as ambiguous
+
+
+def _roi(arr: np.ndarray) -> np.ndarray:
+    """Crop to the central lung-field region, dropping borders/labels."""
+    h, w = arr.shape
+    return arr[int(h * 0.20):int(h * 0.85), int(w * 0.12):int(w * 0.88)]
+
+
+def image_features(pre: PreprocessResult) -> dict[str, Any]:
+    """Derive interpretable features from a preprocessed chest X-ray."""
+    arr = np.asarray(pre.image.convert("L"), dtype=np.float32)
+    roi = _roi(arr)
+    blur = cv2.GaussianBlur(roi, (0, 0), sigmaX=max(roi.shape) / 64.0)
+    med = float(np.median(blur))
+    mad = float(np.mean(np.abs(blur - med))) + 1e-6
+    return {
+        "opacity_peak": round(float((blur.max() - med) / mad), 3),
+        "bright_fraction": round(float((blur > med + 2.2 * mad).mean()), 4),
+        "contrast_std": pre.quality_details.get("contrast_std"),
+        "brightness_mean": pre.quality_details.get("brightness_mean"),
+        "sharpness_lap_var": pre.quality_details.get("sharpness_lap_var"),
+    }
+
+
+def _decide(
+    features: dict[str, Any], quality_flag: str, conservative: bool
+) -> tuple[str, float, list[str]]:
+    """Map image features to (class, confidence, evidence).
+
+    `conservative=True` enables the stricter uncertainty handling of
+    improved_prompt.txt: abstain on ambiguous margins and on sub-0.60 confidence.
     """
-    return toy_predict(image_path, mode="baseline")
+    if quality_flag == "poor":
+        return "uncertain", 0.55, ["image quality is poor; a reliable read is not possible"]
+
+    peak = float(features["opacity_peak"])
+    margin = peak - _OPACITY_PEAK_THRESHOLD
+    if margin >= 0:
+        label = "suspected_opacity"
+        confidence = min(0.90, 0.60 + margin * 0.14)
+        evidence = [f"a focal dense region stands out in the lung field (opacity_peak={peak})"]
+    else:
+        label = "normal"
+        confidence = min(0.90, 0.60 + (-margin) * 0.12)
+        evidence = ["no focal dense opacity detected in the lung fields"]
+
+    if conservative and abs(margin) < _OPACITY_MARGIN:
+        label, confidence = "uncertain", min(confidence, 0.55)
+        evidence = ["evidence is too borderline to commit to a class"]
+
+    if confidence < 0.60:
+        label, confidence = "uncertain", min(confidence, 0.55)
+
+    return label, round(confidence, 3), evidence
+
+
+def _justify(label: str, features: dict[str, Any], quality_flag: str) -> str:
+    base = (
+        f"Rule-based read on image quality '{quality_flag}' and a focal-opacity score "
+        f"(opacity_peak={features.get('opacity_peak')}, threshold={_OPACITY_PEAK_THRESHOLD})."
+    )
+    if label == "suspected_opacity":
+        return base + " A localized dense region exceeds the opacity threshold; a clinician must confirm."
+    if label == "normal":
+        return base + " No focal dense region exceeds the opacity threshold in the lung fields."
+    return base + " The safe output is uncertainty rather than forcing a class."
+
+
+def _make_prediction(
+    *,
+    quality_flag: str,
+    label: str,
+    confidence: float,
+    evidence: list[str],
+    features: dict[str, Any],
+    model_name: str,
+    prompt_version: str,
+    start: float,
+    extra_limitations: list[str] | None = None,
+    extra_flags: list[str] | None = None,
+) -> dict[str, Any]:
+    limitations = list(_BASE_LIMITATIONS)
+    if extra_limitations:
+        limitations.extend(extra_limitations)
+    return {
+        "image_quality": quality_flag,
+        "predicted_class": label,
+        "confidence": round(float(confidence), 3),
+        "visual_evidence": evidence,
+        "justification": _justify(label, features, quality_flag),
+        "limitations": limitations,
+        "warning": WARNING,
+        "model_name": model_name,
+        "prompt_version": prompt_version,
+        "features": features,
+        "preprocessing_flags": extra_flags or [],
+        "latency_ms": int((time.perf_counter() - start) * 1000),
+    }
+
+
+def baseline_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any]:
+    """baseline_v1 — rule-based classifier on PreprocessResult quality + opacity feature."""
+    start = time.perf_counter()
+    pre = preprocess_image(image_path)
+    features = image_features(pre)
+    label, confidence, evidence = _decide(features, pre.quality_flag, conservative=False)
+    return _make_prediction(
+        quality_flag=pre.quality_flag,
+        label=label,
+        confidence=confidence,
+        evidence=evidence,
+        features=features,
+        model_name="rule-baseline-v1",
+        prompt_version="baseline_v1",
+        start=start,
+        extra_flags=pre.preprocessing_flags,
+    )
+
+
+# ---------------------------------------------------------------------------
+# improved_v1 — MedGemma-4B with graceful fallback
+# ---------------------------------------------------------------------------
+
+_USE_MEDGEMMA = os.getenv("USE_MEDGEMMA", "0") == "1"
+_MEDGEMMA_MODEL = os.getenv("MEDGEMMA_MODEL_ID", "google/medgemma-4b-it")
+_MEDGEMMA_PIPE = None  # lazily created singleton
+
+
+def _read_prompt(name: str) -> str:
+    path = _PROMPTS_DIR / name
+    return path.read_text(encoding="utf-8") if path.exists() else ""
+
+
+def _extract_json(text: str) -> dict[str, Any]:
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if not match:
+        raise ValueError("no JSON object found in model output")
+    return json.loads(match.group(0))
+
+
+def _get_medgemma_pipe():
+    """Load MedGemma once. Requires `transformers`, `torch`, weights and a HF token."""
+    global _MEDGEMMA_PIPE
+    if _MEDGEMMA_PIPE is None:
+        import torch
+        from transformers import pipeline
+
+        _MEDGEMMA_PIPE = pipeline(
+            "image-text-to-text",
+            model=_MEDGEMMA_MODEL,
+            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+            device_map="auto",
+        )
+    return _MEDGEMMA_PIPE
+
+
+def _medgemma_predict(pre: PreprocessResult, start: float) -> dict[str, Any]:
+    pipe = _get_medgemma_pipe()
+    prompt = _read_prompt("improved_prompt.txt") or _read_prompt("baseline_prompt.txt")
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "image", "image": pre.image},
+                {"type": "text", "text": prompt},
+            ],
+        }
+    ]
+    out = pipe(text=messages, max_new_tokens=400)
+    generated = out[0]["generated_text"]
+    raw = generated[-1]["content"] if isinstance(generated, list) else str(generated)
+    data = _extract_json(raw)
+
+    label = data.get("predicted_class")
+    if label not in ALLOWED_CLASSES:
+        label = "uncertain"
+    try:
+        confidence = float(data.get("confidence", 0.5))
+    except (TypeError, ValueError):
+        confidence = 0.5
+    confidence = min(max(confidence, 0.0), 1.0)
+
+    features = image_features(pre)
+    evidence = data.get("visual_evidence") or ["see model justification"]
+    if not isinstance(evidence, list):
+        evidence = [str(evidence)]
+    return {
+        "image_quality": data.get("image_quality", pre.quality_flag),
+        "predicted_class": label,
+        "confidence": round(confidence, 3),
+        "visual_evidence": evidence,
+        "justification": str(data.get("justification", "")) or _justify(label, features, pre.quality_flag),
+        "limitations": data.get("limitations") or list(_BASE_LIMITATIONS),
+        "warning": WARNING,
+        "model_name": _MEDGEMMA_MODEL,
+        "prompt_version": "improved_v1",
+        "features": features,
+        "preprocessing_flags": pre.preprocessing_flags,
+        "latency_ms": int((time.perf_counter() - start) * 1000),
+    }
+
+
+def improved_predict(image_path: str | Path, mode: str = "improved") -> dict[str, Any]:
+    """improved_v1 — MedGemma-4B VLM, with an automatic rule-based fallback.
+
+    Enable the real model with `USE_MEDGEMMA=1` (needs transformers, torch,
+    the MedGemma weights and a Hugging Face token for the gated repo). When it is
+    disabled or fails to load, a stricter rule-based predictor is used instead so
+    the pipeline and CI stay green.
+    """
+    start = time.perf_counter()
+    pre = preprocess_image(image_path)
+
+    if _USE_MEDGEMMA:
+        try:
+            return _medgemma_predict(pre, start)
+        except Exception as exc:  # model/token/weights unavailable -> degrade gracefully
+            fallback_reason = f"medgemma_unavailable: {type(exc).__name__}: {exc}"
+    else:
+        fallback_reason = "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+
+    features = image_features(pre)
+    label, confidence, evidence = _decide(features, pre.quality_flag, conservative=True)
+    return _make_prediction(
+        quality_flag=pre.quality_flag,
+        label=label,
+        confidence=confidence,
+        evidence=evidence,
+        features=features,
+        model_name="rule-improved-v1-fallback",
+        prompt_version="improved_v1",
+        start=start,
+        extra_limitations=[fallback_reason],
+        extra_flags=pre.preprocessing_flags + [fallback_reason],
+    )
+
+
+# ---------------------------------------------------------------------------
+# Dispatch helpers
+# ---------------------------------------------------------------------------
+
+PREDICTORS: dict[str, Callable[..., dict[str, Any]]] = {
+    "toy": toy_predict,
+    "baseline": baseline_predict,
+    "improved": improved_predict,
+}
+
+
+def predict(image_path: str | Path, model: str = "baseline") -> dict[str, Any]:
+    """Single entry point used by the API / app layers."""
+    return PREDICTORS.get(model, baseline_predict)(image_path)
+
+
+def vlm_predict_placeholder(image_path: str | Path, prompt: str) -> dict[str, Any]:
+    """Backward-compatible alias; the real VLM path now lives in improved_predict."""
+    return improved_predict(image_path)
