@@ -85,8 +85,8 @@ def toy_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any
 # in median-absolute-deviation (MAD) units. A focal pneumonic opacity appears as a
 # bright, dense blob -> high peak. These thresholds are calibrated on the synthetic
 # smoke set and MUST be re-tuned on the RSNA dev split in étape 3.
-_OPACITY_PEAK_THRESHOLD = 4.0
-_OPACITY_MARGIN = 0.45  # |peak - threshold| below this is treated as ambiguous
+_OPACITY_PEAK_THRESHOLD = 2.30   # calibré sur 150 cas dev RSNA (étape 3)
+_OPACITY_MARGIN = 0.30           # zone d'ambiguité pour improved_v1 (conservateur)
 
 
 def _roi(arr: np.ndarray) -> np.ndarray:
