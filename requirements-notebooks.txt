@@ -1,0 +1,9 @@
+# Dépendances pour exécuter les notebooks pédagogiques (notebooks/*.ipynb).
+# Le cœur de l'application (requirements.txt) ne les inclut pas volontairement :
+# l'app, l'API et l'évaluation n'ont pas besoin de Jupyter ni de matplotlib.
+#
+# Installation :  pip install -r requirements-notebooks.txt
+# (pandas est déjà fourni par requirements.txt)
+jupyterlab>=4.0
+ipykernel>=6.29
+matplotlib>=3.8

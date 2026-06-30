@@ -27,15 +27,32 @@ Prototype pédagogique d'IA médicale multimodale pour apprendre à construire u
 
 Le bon rendu ne cherche pas à impressionner par un modèle spectaculaire. Il démontre une méthode : périmètre limité, baseline reproductible, garde-fous, évaluation, analyse d'erreurs et limites explicites.
 
-## Démarrage rapide
+## Démarrage rapide (première installation sur un nouveau PC)
 
 ```bash
+# 1. Cloner le dépôt et se placer dedans
+git clone https://github.com/ElhSabrina/assistant-radiologue-virtuel.git
+cd assistant-radiologue-virtuel
+
+# 2. Créer l'environnement et installer les dépendances
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+.venv\Scripts\activate          # Windows (PowerShell)
+# source .venv/bin/activate     # macOS / Linux
 pip install -r requirements.txt
-python eval/run_evaluation.py --mode toy
+
+# 3. Lancer l'application (TOUJOURS depuis la racine du dépôt)
 streamlit run app/streamlit_app.py
 ```
+
+L'application s'ouvre dans le navigateur. La configuration **Toy** (menu
+« Configuration ») fonctionne **immédiatement**, sans GPU ni téléchargement — c'est
+le mode à utiliser pour une démo qui marche à coup sûr.
+
+Les configurations **MedGemma** (baseline et improved) nécessitent en plus : un GPU
+NVIDIA, une build CUDA de PyTorch, et l'accès au modèle MedGemma — voir la section
+[Extension MedGemma + RSNA](#extension-medgemma--rsna). La config *improved* utilise
+l'adaptateur fine-tuné s'il est présent dans `finetuning/adapter/` (non versionné :
+à copier depuis Kaggle, cf. [finetuning/README.md](finetuning/README.md)).
 
 ## Smoke test du dépôt
 
@@ -67,6 +84,36 @@ curl -X POST "http://127.0.0.1:8000/predict" \
 
 La réponse doit contenir une classe, une confiance, des observations visuelles, une justification, des limites et l'avertissement non clinique.
 
+## Extension MedGemma + RSNA
+
+Au-delà du moteur jouet, le dépôt intègre une vraie chaîne vision-langage
+**MedGemma-4b-it** évaluée sur un sous-ensemble **RSNA Pneumonia**. Voir
+[docs/rapport.md](docs/rapport.md) pour la méthode, les prompts, les métriques et
+les limites.
+
+```bash
+cd Projet-ARVI   # se placer à la racine du dépôt d'abord
+pip install torch --index-url https://download.pytorch.org/whl/cu124   # build CUDA
+python data/prepare_rsna.py --per-class 15                             # jeu de cas RSNA
+python eval/run_evaluation.py --engine medgemma --mode toy \
+  --cases data/rsna_cases.csv --out-dir eval/results \
+  --db-path eval/results/runs.sqlite                                   # baseline vs improved
+python eval/build_dashboard.py                                         # graphique de comparaison
+python eval/error_register.py --predictions eval/results/improved_predictions.csv
+streamlit run app/streamlit_app.py                                     # démo (moteur "medgemma")
+```
+
+MedGemma tourne quantisé en 4-bit (bitsandbytes) en `bfloat16` pour tenir sur un
+GPU 6 Go. Modèle et dataset conservent leurs licences propres (Google HAI-DEF pour
+MedGemma, règles de la compétition Kaggle pour RSNA) ; aucune donnée patient n'est
+committée.
+
+L'application propose trois configurations : **Toy** (règles instantanées),
+**MedGemma baseline** (modèle de base + prompt de base) et **MedGemma improved**
+(modèle **fine-tuné LoRA** + prompt renforcé). L'*improved* charge l'adaptateur
+placé dans `finetuning/adapter/` (variable `MEDGEMMA_ADAPTER`) — voir
+[finetuning/README.md](finetuning/README.md).
+
 ## Organisation
 
 ```text
@@ -86,11 +133,356 @@ assistant-radiologue-virtuel/
 
 ## Livrables attendus
 
-| Niveau | Attendu |
-|---|---|
-| **MUST** | Baseline reproductible, sortie JSON valide, warning obligatoire, logs, métriques, mini-rapport |
-| **SHOULD** | Prompt amélioré, règle d'incertitude, comparaison baseline/amélioration, analyse d'erreurs |
-| **COULD** | LoRA expérimental, MedGemma/PEFT, localisation visuelle, ablations de prompts |
+> Niveaux de réalisation attendus : **Must / Should / Could**
+
+Cette section sert à clarifier ce qui est attendu des étudiants selon trois niveaux de maturité : `Must have`, `Should have` et `Could have`. Le projet doit rester centré sur un prototype pédagogique d’IA médicale, non clinique, limité à une radiographie thoracique frontale et à trois classes :
+
+* `normal` : aucun signe évident d’opacité sur l’image analysée ;
+* `suspected_opacity` : présence possible d’une opacité ou d’un signal visuel suspect ;
+* `uncertain` : qualité d’image insuffisante, signes ambigus ou confiance trop faible pour conclure.
+
+La classe `uncertain` est volontairement conservée. Elle ne doit pas être considérée comme un échec du modèle, mais comme un garde-fou méthodologique. Dans un contexte médical, savoir ne pas conclure lorsqu’une image est ambiguë fait partie de la qualité attendue.
+
+### Niveau 1 (Must have) : socle minimal obligatoire
+
+Le niveau Must correspond au minimum attendu pour considérer le projet comme fonctionnel, compréhensible et soutenable.
+
+À ce niveau, les étudiants doivent livrer une première chaîne complète, même simple. L’objectif n’est pas encore d’obtenir le meilleur score possible, mais de prouver que le système fonctionne de bout en bout : une image entre, une analyse est produite, la sortie est structurée, les résultats sont sauvegardés, et les limites sont clairement affichées.
+
+**Fonctionnalités attendues :**
+
+* mettre en place un dépôt Git propre, avec une structure claire et documentée ;
+* préparer un petit jeu de données initial, synthétique ou public autorisé ;
+* utiliser environ 20 images pour vérifier la chaîne complète ;
+* construire une baseline reproductible par prompting ;
+* accepter une radiographie thoracique frontale en entrée ;
+* produire une sortie JSON structurée ;
+* afficher une classe parmi `normal`, `suspected_opacity` ou `uncertain` ;
+* fournir un score de confiance ;
+* produire une justification courte, fondée uniquement sur les éléments visibles ;
+* ajouter un avertissement non clinique obligatoire ;
+* journaliser les résultats : image, prompt, modèle, prédiction, latence, sortie JSON ;
+* fournir une première interface web simple avec Streamlit, Gradio ou FastAPI ;
+* présenter une première évaluation simple avec quelques exemples de réussite et d’échec.
+
+Champs minimaux attendus dans la sortie JSON :
+
+```json
+{
+  "image_quality": "good | limited | poor",
+  "predicted_class": "normal | suspected_opacity | uncertain",
+  "confidence": 0.0,
+  "visual_evidence": ["observation courte"],
+  "justification": "justification synthétique et prudente",
+  "limitations": ["limite identifiée"],
+  "warning": "Prototype pédagogique uniquement. Non destiné au diagnostic médical."
+}
+```
+
+**Critères d’acceptation :**
+
+* le projet peut être installé et lancé à partir du README ;
+* une image peut être envoyée dans l’application ;
+* une réponse JSON est produite ;
+* le warning médical est toujours présent ;
+* les résultats sont sauvegardés ;
+* le groupe peut expliquer la baseline, ses limites et ses premières erreurs.
+
+Un projet qui atteint correctement ce niveau est déjà un projet recevable, à condition qu’il soit clair, reproductible et honnête sur ses limites.
+
+**Diagramme :** 
+```text
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                         MUST HAVE - SOCLE MINIMAL                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+      ┌──────────────────────┐
+      │  Dépôt Git propre     │
+      │  README, docs, src,   │
+      │  app, data, prompts   │
+      └──────────┬───────────┘
+                 │
+                 ▼
+      ┌──────────────────────┐
+      │  Jeu initial          │
+      │  20 images environ    │
+      │  synthétiques ou      │
+      │  publiques autorisées │
+      └──────────┬───────────┘
+                 │
+                 ▼
+      ┌──────────────────────┐
+      │  Entrée image         │
+      │  radiographie         │
+      │  thoracique frontale  │
+      └──────────┬───────────┘
+                 │
+                 ▼
+      ┌──────────────────────┐
+      │  Baseline prompting   │
+      │  1 modèle             │
+      │  1 prompt stable      │
+      │  inférence rejouable  │
+      └──────────┬───────────┘
+                 │
+                 ▼
+      ┌────────────────────────────────────────────────────────────┐
+      │                    Sortie JSON structurée                   │
+      │                                                            │
+      │  {                                                         │
+      │    "image_quality": "...",                                 │
+      │    "predicted_class": "normal | suspected_opacity |         │
+      │                        uncertain",                         │
+      │    "confidence": 0.0,                                      │
+      │    "visual_evidence": ["observations visibles"],           │
+      │    "justification": "courte et prudente",                  │
+      │    "limitations": ["limites connues"],                     │
+      │    "warning": "prototype pédagogique, non clinique"         │
+      │  }                                                         │
+      └──────────┬─────────────────────────────────────────────────┘
+                 │
+                 ▼
+      ┌──────────────────────┐
+      │  Interface web simple │
+      │  Streamlit / Gradio   │
+      │  ou FastAPI minimal   │
+      └──────────┬───────────┘
+                 │
+                 ▼
+      ┌────────────────────────────────────────────────────────────┐
+      │                    Journalisation obligatoire               │
+      │  image | prompt | modèle | prédiction | latence | JSON      │
+      └──────────┬─────────────────────────────────────────────────┘
+                 │
+                 ▼
+      ┌──────────────────────┐
+      │  Première évaluation  │
+      │  réussites, échecs,   │
+      │  limites observées    │
+      └──────────────────────┘
+```
+
+### Niveau 2 (Should have) : amélioration mesurée et analyse critique
+
+Le niveau Should correspond à un projet plus solide, capable de démontrer une véritable progression d’ingénierie.
+
+À ce niveau, les étudiants ne doivent pas seulement montrer que le système fonctionne. Ils doivent montrer qu’ils savent l’évaluer, l’améliorer et interpréter ses erreurs. L’amélioration doit être mesurée, et non simplement déclarée.
+
+**Améliorations attendues :**
+
+* comparer au moins deux versions du système :
+
+  * une baseline par prompt simple ;
+  * une version améliorée par prompt renforcé, garde-fou, ensemble de prompts ou règle d’incertitude ;
+* tester plusieurs prompts sur le même ensemble d’images ;
+* ajouter une règle d’incertitude explicite ;
+* refuser ou basculer vers `uncertain` si le JSON est invalide, si la confiance est faible ou si les signes visuels sont ambigus ;
+* calculer des métriques adaptées :
+
+  * accuracy ;
+  * macro-F1 ;
+  * sensibilité ;
+  * spécificité ;
+  * validité JSON ;
+  * latence ;
+  * taux d’incertitude ;
+  * taux d’hallucination ou de justification non fondée ;
+* construire un tableau de bord simple de suivi des résultats ;
+* documenter 20 à 30 cas finaux commentés ;
+* créer un registre d’erreurs ;
+* distinguer les faux positifs, faux négatifs, incertitudes acceptables, erreurs de format et hallucinations textuelles ;
+* rédiger un mini-rapport expliquant les choix de dataset, les prompts, les métriques, les erreurs et les limites.
+
+**Critères d’acceptation :**
+
+* la comparaison baseline vs amélioration est chiffrée ;
+* les erreurs sont classées et commentées ;
+* les étudiants peuvent expliquer pourquoi une amélioration est conservée ou rejetée ;
+* le rapport ne montre pas seulement les réussites ;
+* la soutenance présente des cas de succès, des cas d’échec et des cas incertains ;
+* la prudence médicale reste visible dans l’interface, dans les sorties et dans le discours.
+
+Le niveau Should est le niveau recommandé pour une bonne soutenance. Il montre que le groupe ne s’est pas limité à une démonstration technique, mais qu’il a construit une démarche expérimentale.
+
+**Diagramme :** 
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                     SHOULD HAVE - AMÉLIORATION MESURÉE                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+                     ┌──────────────────────────┐
+                     │  Même ensemble d'images   │
+                     │  données fixes, labels,   │
+                     │  cas de test identiques   │
+                     └────────────┬─────────────┘
+                                  │
+             ┌────────────────────┴────────────────────┐
+             │                                         │
+             ▼                                         ▼
+┌──────────────────────────┐              ┌──────────────────────────┐
+│ Version A — Baseline      │              │ Version B — Améliorée     │
+│ prompt simple             │              │ prompt renforcé           │
+│ sortie JSON               │              │ garde-fous                │
+│ warning obligatoire       │              │ ensemble de prompts       │
+└────────────┬─────────────┘              │ règle d'incertitude       │
+             │                            └────────────┬─────────────┘
+             │                                         │
+             └────────────────────┬────────────────────┘
+                                  │
+                                  ▼
+                   ┌──────────────────────────────┐
+                   │  Contrôles de cohérence       │
+                   │  - JSON valide ?              │
+                   │  - confiance suffisante ?     │
+                   │  - signes visuels clairs ?    │
+                   │  - justification fondée ?     │
+                   └──────────────┬───────────────┘
+                                  │
+        ┌─────────────────────────┴─────────────────────────┐
+        │                                                   │
+        ▼                                                   ▼
+┌──────────────────────┐                         ┌──────────────────────┐
+│ Sortie acceptée       │                         │ Bascule vers          │
+│ normal ou             │                         │ uncertain             │
+│ suspected_opacity     │                         │ si doute ou anomalie  │
+│ si cohérente          │                         │ de format             │
+└──────────┬───────────┘                         └──────────┬───────────┘
+           │                                                │
+           └──────────────────────┬─────────────────────────┘
+                                  │
+                                  ▼
+                ┌──────────────────────────────────────┐
+                │              Métriques                │
+                │ accuracy | macro-F1 | sensibilité     │
+                │ spécificité | JSON valide | latence   │
+                │ incertitude | hallucination           │
+                └──────────────────┬───────────────────┘
+                                   │
+                                   ▼
+                ┌──────────────────────────────────────┐
+                │        Tableau de bord simple         │
+                │ comparaison baseline vs improved      │
+                │ graphiques, scores, exemples          │
+                └──────────────────┬───────────────────┘
+                                   │
+                                   ▼
+                ┌──────────────────────────────────────┐
+                │        Registre d'erreurs             │
+                │ faux positifs | faux négatifs         │
+                │ incertitudes acceptables              │
+                │ erreurs de format | hallucinations    │
+                └──────────────────┬───────────────────┘
+                                   │
+                                   ▼
+                ┌──────────────────────────────────────┐
+                │      Mini-rapport critique            │
+                │ dataset, prompts, métriques,          │
+                │ erreurs, limites, décisions           │
+                └──────────────────────────────────────┘
+```
+
+### Niveau 3 (Could have) : extensions avancées
+
+Le niveau Could correspond aux extensions ambitieuses. Elles ne doivent être abordées qu’après validation du niveau Must et du niveau Should.
+
+Une extension avancée ne doit jamais remplacer la baseline. Elle doit venir après une première chaîne stable, des données propres, des métriques disponibles et une analyse d’erreurs déjà engagée.
+
+**Extensions possibles :**
+
+* expérimenter une adaptation LoRA ou QLoRA sur un modèle multimodal ;
+* tester Gemma 4 avec Unsloth pour une expérimentation rapide ;
+* tester MedGemma via Hugging Face, PEFT ou QLoRA, sous réserve des conditions d’accès et d’usage ;
+* ajouter un classifieur léger CNN ou ViT pour produire un score de confiance plus contrôlable ;
+* comparer plusieurs familles de modèles ;
+* ajouter une localisation visuelle approximative d’une zone suspecte si les données le permettent ;
+* enrichir la base SQLite avec les cas, prompts, runs, évaluations et erreurs ;
+* ajouter des tests automatiques pour vérifier la validité JSON, la présence du warning et la cohérence des sorties ;
+* construire une API FastAPI plus complète autour de l’endpoint `/predict` ;
+* améliorer l’interface avec un dashboard interactif ;
+* réaliser une ablation systématique des prompts ;
+* analyser l’impact de différents seuils de confiance.
+
+**Critères d’acceptation :**
+
+* l’extension est justifiée par une hypothèse claire ;
+* le gain est mesuré ;
+* la comparaison avec la baseline est conservée ;
+* les conditions d’usage des modèles et datasets sont citées ;
+* les coûts et limites sont documentés ;
+* le système reste explicitement non clinique ;
+* aucune sortie ne doit être présentée comme un diagnostic.
+
+Un bonus technique n’est pertinent que s’il améliore la compréhension, la robustesse ou la qualité de l’évaluation. Un fine-tuning non mesuré, une interface trop complexe ou une extension non reliée aux métriques ne doivent pas être considérés comme une amélioration réelle.
+
+**Diagramme :**
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    COULD HAVE - EXTENSIONS AVANCÉES                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+                           ┌──────────────────────┐
+                           │  Base validée         │
+                           │  Must + Should        │
+                           │  déjà fonctionnels    │
+                           └──────────┬───────────┘
+                                      │
+                                      ▼
+          ┌──────────────────────────────────────────────────────┐
+          │              Choix d'une extension contrôlée          │
+          └──────────────────────────────────────────────────────┘
+                                      │
+       ┌──────────────────────────────┼──────────────────────────────┐
+       │                              │                              │
+       ▼                              ▼                              ▼
+┌──────────────────────┐   ┌──────────────────────┐      ┌──────────────────────┐
+│ Fine-tuning léger     │   │ Score plus contrôlé   │      │ Meilleure API         │
+│ LoRA / QLoRA          │   │ CNN ou ViT léger      │      │ FastAPI /predict      │
+│ Gemma 4 + Unsloth     │   │ calibration           │      │ validation entrée     │
+│ MedGemma + PEFT       │   │ seuils de confiance   │      │ contrats de sortie    │
+└──────────┬───────────┘   └──────────┬───────────┘      └──────────┬───────────┘
+           │                          │                             │
+           ▼                          ▼                             ▼
+┌──────────────────────┐   ┌──────────────────────┐      ┌──────────────────────┐
+│ Comparaison modèles   │   │ Localisation visuelle │      │ Dashboard avancé      │
+│ MedGemma, Gemma 4,    │   │ zone suspecte         │      │ filtres, graphiques,  │
+│ VLM fallback, CNN/ViT │   │ si labels disponibles │      │ suivi des erreurs     │
+└──────────┬───────────┘   └──────────┬───────────┘      └──────────┬───────────┘
+           │                          │                             │
+           └──────────────┬───────────┴──────────────┬──────────────┘
+                          │                          │
+                          ▼                          ▼
+            ┌──────────────────────────┐   ┌──────────────────────────┐
+            │ SQLite enrichi            │   │ Tests automatiques        │
+            │ cases, prompts, runs,     │   │ JSON valide               │
+            │ évaluations, erreurs      │   │ warning présent           │
+            │ versions modèles          │   │ classes autorisées        │
+            └────────────┬─────────────┘   │ cohérence des sorties     │
+                         │                 └────────────┬─────────────┘
+                         │                              │
+                         └──────────────┬───────────────┘
+                                        │
+                                        ▼
+                   ┌──────────────────────────────────┐
+                   │  Analyse avancée                  │
+                   │  ablation de prompts              │
+                   │  impact des seuils de confiance   │
+                   │  gains, coûts, limites            │
+                   └──────────────────────────────────┘
+```
+
+#### Synthèse des attentes
+
+| Niveau      | Intention pédagogique                           | Résultat attendu                                              |
+| ----------- | ----------------------------------------------- | ------------------------------------------------------------- |
+| Must have   | Construire une chaîne fonctionnelle et prudente | Baseline, JSON, warning, logs, interface simple               |
+| Should have | Mesurer, comparer et analyser                   | Baseline vs amélioration, métriques, erreurs commentées       |
+| Could have  | Explorer une extension avancée                  | LoRA, MedGemma, classifieur, localisation ou dashboard avancé |
+
+La réussite du projet ne dépend pas du nombre de fonctionnalités ajoutées. Elle dépend de la capacité du groupe à défendre une progression claire : un périmètre maîtrisé, une baseline reproductible, une amélioration mesurée, des erreurs documentées et des limites assumées.
+
+
 
 ## Références techniques
 
@@ -113,6 +505,8 @@ Les pistes avancées doivent rester expérimentales, traçables et justifiées. 
 
 ## Licence et sources externes
 
-Le code pédagogique du dépôt est publié sous licence MIT. **Les datasets externes, modèles et bibliothèques utilisés conservent leurs licences propres** : les étudiants doivent vérifier et documenter les droits d'usage avant toute expérimentation.
+Le code pédagogique du dépôt est publié sous licence MIT. 
 
-Exigence minimale : indiquer dans le rapport la source, la version, la licence ou les conditions d'accès, les restrictions de redistribution, les traitements d'anonymisation et les limites d'interprétation. Aucun fichier patient réel, même pseudonymisé, ne doit être ajouté au dépôt sans autorisation explicite et traçable.
+**Les datasets externes, modèles et bibliothèques utilisés conservent leurs licences propres** : les étudiants doivent vérifier et documenter les droits d'usage avant toute expérimentation.
+
+> **Exigence minimale :** indiquer dans le rapport la source, la version, la licence ou les conditions d'accès, les restrictions de redistribution, les traitements d'anonymisation et les limites d'interprétation. Aucun fichier patient réel, même pseudonymisé, ne doit être ajouté au dépôt sans autorisation explicite et traçable.

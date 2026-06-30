@@ -1,20 +1,30 @@
-﻿.venv/
+.venv/
 __pycache__/
 *.pyc
 .pytest_cache/
 .ipynb_checkpoints/
 tmp_uploads/
-medical_ai_evidence.sqlite
+*.sqlite
 eval/outputs/
+eval/inference_log.csv
+# RSNA data is licensed for the Kaggle competition and must not be redistributed.
+# Keep images AND the derived case lists local (they carry patientId hashes and
+# the competition labels); only aggregate metrics/charts are published.
+data/rsna_pneumonia/
+data/rsna_images/
+data/rsna_raw/
+data/rsna_cases.csv
+data/rsna_cases_large.csv
+data/rsna_cases_heldout.csv
+data/rsna/processed/
+data/rsna/cases.csv
+data/rsna/final_cases_30.csv
+data/exemple/rsna_*
+finetuning/data/
+finetuning/adapter/
 .env
 .DS_Store
 
-# RSNA dataset — DICOM bruts et images traitées (trop lourds, licence Kaggle)
-*.dcm
-data/rsna/raw/
-data/rsna/processed/
-data/rsna/cases.csv
-data/rsna_pneumonia/
 
 # Local/professor visual material
 assets/
@@ -24,7 +34,3 @@ assets/
 
 # Local duplicate; the shareable PDF lives in docs/appel_offre.pdf
 /appel_offre.pdf
-
-# Notes locales (non partagées)
-RECAP_SESSION_ETAPE2.md
-EXPLICATION_inference.md

@@ -12,4 +12,10 @@ opencv-python>=4.10
 pydicom>=2.4
 transformers>=4.56
 accelerate>=0.34
+# For MedGemma: install a CUDA build of torch, e.g.
+#   pip install torch --index-url https://download.pytorch.org/whl/cu124
 torch
+bitsandbytes>=0.43  # 4-bit quantization for MedGemma on 6 GB GPUs
+peft>=0.13  # load the fine-tuned LoRA adapter (MEDGEMMA_ADAPTER)
+numpy>=1.26
+kaggle>=1.6  # RSNA dataset download (data/prepare_rsna.py)
