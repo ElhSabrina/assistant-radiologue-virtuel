@@ -1,4 +1,4 @@
-﻿# ZEROS - Comprendre le projet de zéro
+# ZEROS — Comprendre le projet de zéro
 
 Ce dossier contient une explication complète du projet **Assistant Radiologue Virtuel**, écrite pour quelqu'un qui sait un peu coder mais n'a jamais touché à l'IA ni aux APIs médicales.
 
