@@ -27,15 +27,41 @@ Prototype pédagogique d'IA médicale multimodale pour apprendre à construire u
 
 Le bon rendu ne cherche pas à impressionner par un modèle spectaculaire. Il démontre une méthode : périmètre limité, baseline reproductible, garde-fous, évaluation, analyse d'erreurs et limites explicites.
 
-## Démarrage rapide
+## Demarrage rapide
 
 ```bash
+# 1. Installer les dependances
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+source .venv/bin/activate   # Windows : .venv\Scripts\activate
 pip install -r requirements.txt
-python eval/run_evaluation.py --mode toy
-streamlit run app/streamlit_app.py
+
+# 2. Telecharger les images RSNA (necessite un compte Kaggle gratuit)
+#    - Aller sur https://www.kaggle.com/settings > API > Create New Token > telecharger kaggle.json
+#    - Placer kaggle.json dans ~/.kaggle/  (Mac/Linux) ou C:\Users\TON_NOM\.kaggle\  (Windows)
+python scripts/setup_data.py
+
+# 3. Lancer l'application
+cd app && python -m streamlit run streamlit_app.py
+
+# 4. Lancer les tests
+pytest tests/ -v
 ```
+
+## Branches du projet
+
+| Branche | Contenu |
+|---|---|
+| `main` | Base stable : app, src, prompts, notebooks |
+| `dev/etape1-preprocessing` | Pipeline preprocessing DICOM vers PNG |
+| `dev/etape2-evaluation` | Evaluation MedGemma, notebooks comparaison |
+| `dev/etape3-app` | Interface Streamlit, style, pages |
+
+## Structure des donnees
+
+Les images RSNA **ne sont pas dans le depot** (licence Kaggle + taille).
+Apres `python scripts/setup_data.py` tu auras :
+- `data/rsna/processed/images/` — 200 PNG preprocessees
+- `data/rsna/cases.csv` — 200 cas avec splits (20 smoke / 150 dev / 30 final)
 
 ## Smoke test du dépôt
 
