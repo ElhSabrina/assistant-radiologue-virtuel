@@ -4,9 +4,6 @@ CREATE TABLE IF NOT EXISTS cases (
     source TEXT,
     ground_truth_label TEXT,
     split TEXT,
-    quality TEXT,
-    preprocessing_flags TEXT,
-    bounding_boxes TEXT,
     notes TEXT
 );
 
