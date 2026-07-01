@@ -1,0 +1,24 @@
+timestamp,image_name,model_mode,predicted_class,confidence,latency_ms,warning
+2026-07-02 16:03:34,CXR_SYN_004_normal.png,baseline,normal,0.672,116,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-02 16:04:10,01538c3b-3de9-4fbb-95a8-732235821bbf.jpg,baseline,normal,0.805,155,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-02 16:04:50,01538c3b-3de9-4fbb-95a8-732235821bbf.jpg,baseline,normal,0.805,83,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-02 16:04:58,01469010-0fab-4a07-86c6-962996ce2ca0.jpg,baseline,normal,0.9,407,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-02 16:07:17,CXR_SYN_005_suspected_opacity.png,baseline,suspected_opacity,0.721,35,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-02 16:07:28,00a05408-8291-4231-886e-13763e103161.jpg,baseline,normal,0.895,121,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-02 16:10:20,00a05408-8291-4231-886e-13763e103161.jpg,improved,normal,0.895,87,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-02 16:10:23,00a05408-8291-4231-886e-13763e103161.jpg,baseline,normal,0.895,64,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-02 16:10:28,00a05408-8291-4231-886e-13763e103161.jpg,improved,normal,0.895,56,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-02 16:10:38,1770645814184.jpg,improved,normal,0.889,78,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-02 16:11:34,CXR_SYN_012_uncertain.png,improved,uncertain,0.55,38,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-02 16:11:44,CXR_SYN_015_uncertain.png,baseline,uncertain,0.55,34,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-02 16:11:49,CXR_SYN_019_normal.png,baseline,normal,0.675,29,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-02 16:11:53,CXR_SYN_019_normal.png,baseline,normal,0.675,29,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-04 16:10:50,CXR_SYN_029_suspected_opacity.png,improved,suspected_opacity,0.9,71,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-04 16:10:57,CXR_SYN_028_normal.png,improved,suspected_opacity,0.748,27,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-04 16:11:04,CXR_SYN_027_uncertain.png,improved,uncertain,0.55,64,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-04 16:11:19,CXR_SYN_025_normal.png,improved,suspected_opacity,0.748,28,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-04 16:12:15,RSNA_066e0d5c_0f47_425c_aa7f_9003c355086b.png,baseline,normal,0.705,85,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-05 09:54:33,CXR_SYN_004_normal.png,baseline,suspected_opacity,0.754,76,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-05 10:07:44,RSNA_3862449a_cc8b_40da_91a0_a1437618e65c.png,baseline,normal,0.636,88,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-05 10:08:13,RSNA_3862449a_cc8b_40da_91a0_a1437618e65c.png,improved,uncertain,0.55,36,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
+2026-07-05 10:08:17,RSNA_3862449a_cc8b_40da_91a0_a1437618e65c.png,baseline,normal,0.636,69,Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
