@@ -1,4 +1,4 @@
-﻿# 09 - Éthique et loi : pourquoi c'est sérieux
+# 09 — Éthique et loi : pourquoi c'est sérieux
 
 ## Le paradoxe de CheXNet
 
@@ -188,6 +188,6 @@ Un médecin qui sait que le système ne détecte que la pneumonie fera lui-même
 ## Pour aller plus loin
 
 - [AI Act officiel (EUR-Lex)](https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32024R1689)
-- Ji et al. (2023) - Survey on Hallucination in Natural Language Generation, ACM Computing Surveys
-- Rajpurkar et al. (2017) - CheXNet: Radiologist-Level Pneumonia Detection on Chest X-Rays, Stanford ML Group
-- Google DeepMind (2025) - MedGemma Technical Report
+- Ji et al. (2023) — Survey on Hallucination in Natural Language Generation, ACM Computing Surveys
+- Rajpurkar et al. (2017) — CheXNet: Radiologist-Level Pneumonia Detection on Chest X-Rays, Stanford ML Group
+- Google DeepMind (2025) — MedGemma Technical Report
