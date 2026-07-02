@@ -1,4 +1,4 @@
-﻿# 02 - L'IA pour les nuls
+# 02 — L'IA pour les nuls
 
 ## C'est quoi l'intelligence artificielle, vraiment ?
 
@@ -54,7 +54,7 @@ MedGemma 4B (le modèle de ce projet) a **4 milliards de paramètres**. C'est un
 
 ## CNN vs VLM : quelle différence ?
 
-### CNN (réseau de neurones convolutif) - la génération 1
+### CNN (réseau de neurones convolutif) — la génération 1
 
 Les premiers systèmes d'analyse d'images médicales utilisaient des **CNN**. Ils regardent une image et sortent un score.
 
@@ -64,7 +64,7 @@ Les premiers systèmes d'analyse d'images médicales utilisaient des **CNN**. Il
 
 Problème : ce score ne dit rien de plus. Où est la zone suspecte ? Pourquoi 0.87 et pas 0.5 ? Impossible de savoir. C'est une boîte noire.
 
-### VLM (Vision-Language Model) - la génération actuelle
+### VLM (Vision-Language Model) — la génération actuelle
 
 Un VLM fait deux choses à la fois : il **voit** l'image ET il **génère du texte** pour l'expliquer.
 
