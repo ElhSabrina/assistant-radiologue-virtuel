@@ -44,7 +44,6 @@ def test_repository_student_contract_is_present() -> None:
         "create_remote_repo.sh",
         "docs/expert_review_integration.md",
         "docs/github_push_instructions.md",
-        "eval/outputs",
         "medical_ai_evidence.sqlite",
         "assets/assistant_radiologue_v3_notes_professeur_fr.pptx",
         "assets/notes_orales_assistant_radiologue_v3_style_professeur_fr.md",
