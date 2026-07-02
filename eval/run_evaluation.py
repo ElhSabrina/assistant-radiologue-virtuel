@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import argparse
 import csv
@@ -60,7 +60,7 @@ def run(label: str, predictor: Predictor, cases_path: Path, db_path: Path) -> tu
             'guardrail_errors': ';'.join(errors),
         }
         rows.append(row)
-        insert_run(db_path, case['case_id'], str(image_path), pred)
+        insert_run(image_name=case['case_id'], prediction=pred, db_path=db_path)
     metrics = summarize_metrics(rows)
     return rows, metrics
 
