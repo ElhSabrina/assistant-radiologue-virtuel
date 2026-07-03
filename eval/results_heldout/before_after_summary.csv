@@ -1,0 +1,3 @@
+mode,engine,n,accuracy,macro_f1,sensitivity,specificity,json_valid_rate,warning_rate,uncertain_rate,hallucination_rate,mean_latency_ms
+baseline,medgemma,80,0.875,0.6061,0.875,0.875,1.0,1.0,0.075,0.0,59593.8
+improved,medgemma,80,0.875,0.582,0.75,1.0,1.0,1.0,0.0,0.0,76370.6
