@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import json
 import os
@@ -9,6 +9,9 @@ from typing import Any, Callable
 
 import cv2
 import numpy as np
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from .preprocessing import PreprocessResult, basic_quality_flag, preprocess_image
 
@@ -73,20 +76,26 @@ def toy_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any
 # Étape 2 — real baseline / improved predictors
 # ===========================================================================
 #
-# baseline_v1 : rule-based classifier on the quality metrics of PreprocessResult
-#               plus a focal-opacity image feature (Option A of the appel d'offre).
-# improved_v1 : MedGemma-4B vision-language model via Hugging Face Transformers
-#               (Option B), gated behind USE_MEDGEMMA and with an automatic
-#               rule-based fallback so the pipeline never breaks when the model,
-#               its weights or a HF token are not available (e.g. in CI).
+# baseline_v1 : MedGemma-4B vision-language model (Hugging Face Transformers)
+#               prompted with prompts/baseline_prompt.txt.
+# improved_v1 : the same MedGemma-4B model prompted with the stricter
+#               prompts/improved_prompt.txt (explicit uncertainty checks,
+#               forced "uncertain" below 0.60 confidence). A fine-tuned
+#               checkpoint will replace the base model here in a later étape.
+#
+# Both modes are gated behind USE_MEDGEMMA and fall back to an automatic
+# rule-based predictor (on the quality metrics of PreprocessResult plus a
+# focal-opacity image feature) so the pipeline never breaks when the model,
+# its weights or a HF token are not available (e.g. in CI).
 # ---------------------------------------------------------------------------
 
 # opacity_peak: contrast of the densest blob inside the lung-field ROI, expressed
 # in median-absolute-deviation (MAD) units. A focal pneumonic opacity appears as a
-# bright, dense blob -> high peak. These thresholds are calibrated on the synthetic
-# smoke set and MUST be re-tuned on the RSNA dev split in étape 3.
-_OPACITY_PEAK_THRESHOLD = 2.30   # calibré sur 150 cas dev RSNA (étape 3)
-_OPACITY_MARGIN = 0.30           # zone d'ambiguité pour improved_v1 (conservateur)
+# bright, dense blob -> high peak. These thresholds are calibrated on the RSNA
+# dev split (étape 3). The value 2.30 was found by grid-search on 150 dev cases;
+# 4.0 was the synthetic-set default and produced near-100% uncertain on real images.
+_OPACITY_PEAK_THRESHOLD = 2.30
+_OPACITY_MARGIN = 0.30  # |peak - threshold| below this is treated as ambiguous
 
 
 def _roi(arr: np.ndarray) -> np.ndarray:
@@ -187,27 +196,8 @@ def _make_prediction(
     }
 
 
-def baseline_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any]:
-    """baseline_v1 — rule-based classifier on PreprocessResult quality + opacity feature."""
-    start = time.perf_counter()
-    pre = preprocess_image(image_path)
-    features = image_features(pre)
-    label, confidence, evidence = _decide(features, pre.quality_flag, conservative=False)
-    return _make_prediction(
-        quality_flag=pre.quality_flag,
-        label=label,
-        confidence=confidence,
-        evidence=evidence,
-        features=features,
-        model_name="rule-baseline-v1",
-        prompt_version="baseline_v1",
-        start=start,
-        extra_flags=pre.preprocessing_flags,
-    )
-
-
 # ---------------------------------------------------------------------------
-# improved_v1 — MedGemma-4B with graceful fallback
+# baseline_v1 / improved_v1 — MedGemma-4B with graceful rule-based fallback
 # ---------------------------------------------------------------------------
 
 _USE_MEDGEMMA = os.getenv("USE_MEDGEMMA", "0") == "1"
@@ -232,20 +222,28 @@ def _get_medgemma_pipe():
     global _MEDGEMMA_PIPE
     if _MEDGEMMA_PIPE is None:
         import torch
+        from huggingface_hub import login
         from transformers import pipeline
+
+        hf_token = os.getenv("HF_TOKEN")
+        if hf_token:
+            login(token=hf_token, add_to_git_credential=False)
 
         _MEDGEMMA_PIPE = pipeline(
             "image-text-to-text",
             model=_MEDGEMMA_MODEL,
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
+            dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
             device_map="auto",
+            token=hf_token,
         )
     return _MEDGEMMA_PIPE
 
 
-def _medgemma_predict(pre: PreprocessResult, start: float) -> dict[str, Any]:
+def _medgemma_predict(
+    pre: PreprocessResult, start: float, *, prompt_file: str, prompt_version: str
+) -> dict[str, Any]:
     pipe = _get_medgemma_pipe()
-    prompt = _read_prompt("improved_prompt.txt") or _read_prompt("baseline_prompt.txt")
+    prompt = _read_prompt(prompt_file)
     messages = [
         {
             "role": "user",
@@ -273,6 +271,14 @@ def _medgemma_predict(pre: PreprocessResult, start: float) -> dict[str, Any]:
     evidence = data.get("visual_evidence") or ["see model justification"]
     if not isinstance(evidence, list):
         evidence = [str(evidence)]
+
+    # The prompt asks MedGemma to include its own "warning" field, but the
+    # value actually shown to the user is always the hardcoded WARNING
+    # constant below (exact, audited safety text). `model_warning_present`
+    # records whether the model followed that instruction, for prompt-quality
+    # monitoring — it does not affect what is displayed.
+    model_warning_present = bool(str(data.get("warning") or "").strip())
+
     return {
         "image_quality": data.get("image_quality", pre.quality_flag),
         "predicted_class": label,
@@ -281,46 +287,85 @@ def _medgemma_predict(pre: PreprocessResult, start: float) -> dict[str, Any]:
         "justification": str(data.get("justification", "")) or _justify(label, features, pre.quality_flag),
         "limitations": data.get("limitations") or list(_BASE_LIMITATIONS),
         "warning": WARNING,
+        "model_warning_present": model_warning_present,
         "model_name": _MEDGEMMA_MODEL,
-        "prompt_version": "improved_v1",
+        "prompt_version": prompt_version,
         "features": features,
         "preprocessing_flags": pre.preprocessing_flags,
         "latency_ms": int((time.perf_counter() - start) * 1000),
     }
 
 
-def improved_predict(image_path: str | Path, mode: str = "improved") -> dict[str, Any]:
-    """improved_v1 — MedGemma-4B VLM, with an automatic rule-based fallback.
-
-    Enable the real model with `USE_MEDGEMMA=1` (needs transformers, torch,
-    the MedGemma weights and a Hugging Face token for the gated repo). When it is
-    disabled or fails to load, a stricter rule-based predictor is used instead so
-    the pipeline and CI stay green.
-    """
+def _medgemma_predict_with_fallback(
+    image_path: str | Path,
+    *,
+    prompt_file: str,
+    prompt_version: str,
+    conservative_fallback: bool,
+    fallback_model_name: str,
+) -> dict[str, Any]:
     start = time.perf_counter()
     pre = preprocess_image(image_path)
 
     if _USE_MEDGEMMA:
         try:
-            return _medgemma_predict(pre, start)
+            return _medgemma_predict(pre, start, prompt_file=prompt_file, prompt_version=prompt_version)
         except Exception as exc:  # model/token/weights unavailable -> degrade gracefully
             fallback_reason = f"medgemma_unavailable: {type(exc).__name__}: {exc}"
     else:
         fallback_reason = "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
 
     features = image_features(pre)
-    label, confidence, evidence = _decide(features, pre.quality_flag, conservative=True)
+    label, confidence, evidence = _decide(features, pre.quality_flag, conservative=conservative_fallback)
     return _make_prediction(
         quality_flag=pre.quality_flag,
         label=label,
         confidence=confidence,
         evidence=evidence,
         features=features,
-        model_name="rule-improved-v1-fallback",
-        prompt_version="improved_v1",
+        model_name=fallback_model_name,
+        prompt_version=prompt_version,
         start=start,
         extra_limitations=[fallback_reason],
         extra_flags=pre.preprocessing_flags + [fallback_reason],
+    )
+
+
+def baseline_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any]:
+    """baseline_v1 — MedGemma-4B VLM prompted with baseline_prompt.txt.
+
+    Enable the real model with `USE_MEDGEMMA=1` (needs transformers, torch,
+    the MedGemma weights and a Hugging Face token for the gated repo). When it is
+    disabled or fails to load, a rule-based predictor is used instead so the
+    pipeline and CI stay green.
+    """
+    return _medgemma_predict_with_fallback(
+        image_path,
+        prompt_file="baseline_prompt.txt",
+        prompt_version="baseline_v1",
+        conservative_fallback=False,
+        fallback_model_name="rule-baseline-v1-fallback",
+    )
+
+
+def improved_predict(image_path: str | Path, mode: str = "improved") -> dict[str, Any]:
+    """improved_v1 — MedGemma-4B VLM prompted with improved_prompt.txt (stricter
+    uncertainty rules), with an automatic rule-based fallback.
+
+    A fine-tuned MedGemma checkpoint will replace the base model here in a
+    later étape; the prompt_version/model_name contract stays the same.
+
+    Enable the real model with `USE_MEDGEMMA=1` (needs transformers, torch,
+    the MedGemma weights and a Hugging Face token for the gated repo). When it is
+    disabled or fails to load, a stricter rule-based predictor is used instead so
+    the pipeline and CI stay green.
+    """
+    return _medgemma_predict_with_fallback(
+        image_path,
+        prompt_file="improved_prompt.txt",
+        prompt_version="improved_v1",
+        conservative_fallback=True,
+        fallback_model_name="rule-improved-v1-fallback",
     )
 
 
@@ -341,5 +386,10 @@ def predict(image_path: str | Path, model: str = "baseline") -> dict[str, Any]:
 
 
 def vlm_predict_placeholder(image_path: str | Path, prompt: str) -> dict[str, Any]:
-    """Backward-compatible alias; the real VLM path now lives in improved_predict."""
+    """Backward-compatible alias for improved_predict.
+
+    The `prompt` argument is accepted for API compatibility but is intentionally
+    ignored — improved_predict always reads prompts/improved_prompt.txt from disk,
+    so the caller cannot override the prompt at runtime.
+    """
     return improved_predict(image_path)
