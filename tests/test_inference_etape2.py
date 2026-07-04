@@ -55,17 +55,17 @@ def _rsna_available() -> bool:
     return all((RSNA_TEST_DIR / n).exists() for n in _RSNA_SAMPLES)
 
 
-# Marks de saut — chaque groupe de tests est isolé de l'autre.
+# Marks de saut: chaque groupe de tests est isolé de l'autre.
 rsna_only = pytest.mark.skipif(
     not _rsna_available(),
-    reason="RSNA Test images not found — skipping real-image tests",
+    reason="RSNA Test images not found: skipping real-image tests",
 )
 
 # Fallback tests : skippés si MedGemma est actif (sinon les assertions sur
 # "rule-*-fallback" échoueraient car le vrai modèle répondrait).
 no_medgemma = pytest.mark.skipif(
     _MEDGEMMA_ENABLED,
-    reason="Fallback tests disabled when USE_MEDGEMMA=1 — run medgemma tests instead",
+    reason="Fallback tests disabled when USE_MEDGEMMA=1: run medgemma tests instead",
 )
 
 # Tests MedGemma : skippés si USE_MEDGEMMA=0 ou si HF_TOKEN est absent.
@@ -76,7 +76,7 @@ medgemma_only = pytest.mark.skipif(
 
 
 # ===========================================================================
-# GROUPE 1 — Fallback (sans MedGemma)
+# GROUPE 1: Fallback (sans MedGemma)
 # Vérifie que le pipeline reste opérationnel quand le VLM n'est pas disponible.
 # ===========================================================================
 
@@ -152,7 +152,7 @@ def test_predict_dispatches_to_improved() -> None:
 
 
 # ===========================================================================
-# GROUPE 2 — Intégration MedGemma (USE_MEDGEMMA=1 + HF_TOKEN requis)
+# GROUPE 2: Intégration MedGemma (USE_MEDGEMMA=1 + HF_TOKEN requis)
 # Vérifie que la connexion HuggingFace fonctionne et que le vrai modèle
 # répond avec un schéma valide.
 # ===========================================================================
@@ -168,7 +168,7 @@ def test_medgemma_connection_is_established() -> None:
         if "medgemma_unavailable" in str(item).lower()
     ]
     assert not unavailable, (
-        f"MedGemma failed to load — connexion HF ou token invalide: {unavailable}"
+        f"MedGemma failed to load: connexion HF ou token invalide: {unavailable}"
     )
     assert pred["model_name"] == _MEDGEMMA_MODEL_ID, (
         f"Expected real model '{_MEDGEMMA_MODEL_ID}', got fallback '{pred['model_name']}'"
@@ -237,7 +237,7 @@ def test_medgemma_features_are_extracted() -> None:
 
 
 # ===========================================================================
-# GROUPE 3 — toy_predict (indépendant de MedGemma, toujours actif)
+# GROUPE 3: toy_predict (indépendant de MedGemma, toujours actif)
 # ===========================================================================
 
 def test_toy_predict_has_required_schema_fields() -> None:
@@ -270,7 +270,7 @@ def test_predict_unknown_model_falls_back_to_baseline() -> None:
 
 
 # ===========================================================================
-# GROUPE 4 — Fichiers de prompts (indépendant de MedGemma)
+# GROUPE 4: Fichiers de prompts (indépendant de MedGemma)
 # ===========================================================================
 
 def test_baseline_prompt_exists_and_is_non_empty() -> None:
@@ -293,7 +293,7 @@ def test_improved_prompt_is_stricter_than_baseline() -> None:
 
 
 # ===========================================================================
-# GROUPE 5 — image_features (indépendant de MedGemma)
+# GROUPE 5: image_features (indépendant de MedGemma)
 # ===========================================================================
 
 def test_image_features_are_bounded() -> None:
@@ -331,7 +331,7 @@ def test_warning_is_hardcoded_constant_across_all_predictors() -> None:
 
 
 # ===========================================================================
-# GROUPE 6 — vlm_predict_placeholder (alias backward-compat)
+# GROUPE 6: vlm_predict_placeholder (alias backward-compat)
 # ===========================================================================
 
 @no_medgemma
@@ -345,7 +345,7 @@ def test_vlm_predict_placeholder_returns_improved_schema() -> None:
 
 
 # ===========================================================================
-# GROUPE 7 — Images réelles RSNA (skippées si images absentes)
+# GROUPE 7: Images réelles RSNA (skippées si images absentes)
 # ===========================================================================
 
 @rsna_only

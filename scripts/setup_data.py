@@ -1,5 +1,5 @@
 """
-setup_data.py — Telecharge et prepare les 200 images RSNA pour le projet.
+setup_data.py: Telecharge et prepare les 200 images RSNA pour le projet.
 
 Usage:
     python scripts/setup_data.py

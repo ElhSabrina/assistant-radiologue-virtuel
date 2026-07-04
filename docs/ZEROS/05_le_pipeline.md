@@ -1,4 +1,4 @@
-# 05 — Le pipeline : comment tout s'assemble
+# 05: Le pipeline : comment tout s'assemble
 
 ## C'est quoi un pipeline ?
 
