@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from src.database import get_recent_runs, get_stats
 
 st.set_page_config(
-    page_title="Historique — Assistant Radiologue",
+    page_title="Historique: Assistant Radiologue",
     page_icon="📊",
     layout="wide",
 )
