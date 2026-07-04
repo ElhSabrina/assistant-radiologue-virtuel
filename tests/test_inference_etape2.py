@@ -34,7 +34,7 @@ def test_baseline_separates_the_three_synthetic_classes() -> None:
     # Low-quality images are flagged "poor" by preprocessing -> safe abstention.
     assert baseline_predict(_sample("CXR_SYN_003_uncertain.png"))["predicted_class"] == "uncertain"
     # After RSNA calibration the synthetic normal image (opacity_peak ~3.4) sits
-    # above the new threshold — valid output either way.
+    # above the new threshold: valid output either way.
     assert baseline_predict(_sample("CXR_SYN_001_normal.png"))["predicted_class"] in {"normal", "suspected_opacity"}
 
 

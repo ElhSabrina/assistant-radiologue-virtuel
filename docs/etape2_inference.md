@@ -1,4 +1,4 @@
-﻿# Étape 2 — Inférence baseline & amélioration
+﻿# Étape 2: Inférence baseline & amélioration
 
 Ce document décrit le prédicteur réel qui remplace `toy_predict` (squelette).
 

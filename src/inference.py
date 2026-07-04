@@ -20,7 +20,7 @@ _PROMPTS_DIR = Path(__file__).resolve().parents[1] / "prompts"
 
 
 # ---------------------------------------------------------------------------
-# Toy predictor — deterministic, filename-driven.
+# Toy predictor: deterministic, filename-driven.
 # Kept for the CI smoke tests and `--mode toy`; it is NOT medical inference.
 # ---------------------------------------------------------------------------
 
@@ -70,7 +70,7 @@ def toy_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any
 
 
 # ===========================================================================
-# Étape 2 — real baseline / improved predictors
+# Étape 2: real baseline / improved predictors
 # ===========================================================================
 #
 # baseline_v1 : rule-based classifier on the quality metrics of PreprocessResult
@@ -188,7 +188,7 @@ def _make_prediction(
 
 
 def baseline_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any]:
-    """baseline_v1 — rule-based classifier on PreprocessResult quality + opacity feature."""
+    """baseline_v1: rule-based classifier on PreprocessResult quality + opacity feature."""
     start = time.perf_counter()
     pre = preprocess_image(image_path)
     features = image_features(pre)
@@ -207,7 +207,7 @@ def baseline_predict(image_path: str | Path, mode: str = "baseline") -> dict[str
 
 
 # ---------------------------------------------------------------------------
-# improved_v1 — MedGemma-4B with graceful fallback
+# improved_v1: MedGemma-4B with graceful fallback
 # ---------------------------------------------------------------------------
 
 _USE_MEDGEMMA = os.getenv("USE_MEDGEMMA", "0") == "1"
@@ -290,7 +290,7 @@ def _medgemma_predict(pre: PreprocessResult, start: float) -> dict[str, Any]:
 
 
 def improved_predict(image_path: str | Path, mode: str = "improved") -> dict[str, Any]:
-    """improved_v1 — MedGemma-4B VLM, with an automatic rule-based fallback.
+    """improved_v1: MedGemma-4B VLM, with an automatic rule-based fallback.
 
     Enable the real model with `USE_MEDGEMMA=1` (needs transformers, torch,
     the MedGemma weights and a Hugging Face token for the gated repo). When it is
