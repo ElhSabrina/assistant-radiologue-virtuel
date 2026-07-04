@@ -48,7 +48,7 @@ def _load_dicom_array(path: Path) -> np.ndarray:
     lo, hi = arr.min(), arr.max()
     arr = (arr - lo) / (hi - lo) * 255.0 if hi > lo else np.zeros_like(arr)
 
-    # MONOCHROME1: bone=dark, air=bright — flip to standard MONOCHROME2 convention
+    # MONOCHROME1: bone=dark, air=bright: flip to standard MONOCHROME2 convention
     if getattr(ds, "PhotometricInterpretation", "") == "MONOCHROME1":
         arr = 255.0 - arr
 

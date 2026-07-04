@@ -60,8 +60,8 @@ pytest tests/ -v
 
 Les images RSNA **ne sont pas dans le depot** (licence Kaggle + taille).
 Apres `python scripts/setup_data.py` tu auras :
-- `data/rsna/processed/images/` — 200 PNG preprocessees
-- `data/rsna/cases.csv` — 200 cas avec splits (20 smoke / 150 dev / 30 final)
+- `data/rsna/processed/images/`: 200 PNG preprocessees
+- `data/rsna/cases.csv`: 200 cas avec splits (20 smoke / 150 dev / 30 final)
 
 ## Smoke test du dépôt
 

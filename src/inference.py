@@ -23,7 +23,7 @@ _PROMPTS_DIR = Path(__file__).resolve().parents[1] / "prompts"
 
 
 # ---------------------------------------------------------------------------
-# Toy predictor — deterministic, filename-driven.
+# Toy predictor: deterministic, filename-driven.
 # Kept for the CI smoke tests and `--mode toy`; it is NOT medical inference.
 # ---------------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ def toy_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any
 
 
 # ===========================================================================
-# Étape 2 — real baseline / improved predictors
+# Étape 2: real baseline / improved predictors
 # ===========================================================================
 #
 # baseline_v1 : MedGemma-4B vision-language model (Hugging Face Transformers)
@@ -197,7 +197,7 @@ def _make_prediction(
 
 
 # ---------------------------------------------------------------------------
-# baseline_v1 / improved_v1 — MedGemma-4B with graceful rule-based fallback
+# baseline_v1 / improved_v1: MedGemma-4B with graceful rule-based fallback
 # ---------------------------------------------------------------------------
 
 _USE_MEDGEMMA = os.getenv("USE_MEDGEMMA", "0") == "1"
@@ -276,7 +276,7 @@ def _medgemma_predict(
     # value actually shown to the user is always the hardcoded WARNING
     # constant below (exact, audited safety text). `model_warning_present`
     # records whether the model followed that instruction, for prompt-quality
-    # monitoring — it does not affect what is displayed.
+    # monitoring: it does not affect what is displayed.
     model_warning_present = bool(str(data.get("warning") or "").strip())
 
     return {
@@ -332,7 +332,7 @@ def _medgemma_predict_with_fallback(
 
 
 def baseline_predict(image_path: str | Path, mode: str = "baseline") -> dict[str, Any]:
-    """baseline_v1 — MedGemma-4B VLM prompted with baseline_prompt.txt.
+    """baseline_v1: MedGemma-4B VLM prompted with baseline_prompt.txt.
 
     Enable the real model with `USE_MEDGEMMA=1` (needs transformers, torch,
     the MedGemma weights and a Hugging Face token for the gated repo). When it is
@@ -349,7 +349,7 @@ def baseline_predict(image_path: str | Path, mode: str = "baseline") -> dict[str
 
 
 def improved_predict(image_path: str | Path, mode: str = "improved") -> dict[str, Any]:
-    """improved_v1 — MedGemma-4B VLM prompted with improved_prompt.txt (stricter
+    """improved_v1: MedGemma-4B VLM prompted with improved_prompt.txt (stricter
     uncertainty rules), with an automatic rule-based fallback.
 
     A fine-tuned MedGemma checkpoint will replace the base model here in a
@@ -389,7 +389,7 @@ def vlm_predict_placeholder(image_path: str | Path, prompt: str) -> dict[str, An
     """Backward-compatible alias for improved_predict.
 
     The `prompt` argument is accepted for API compatibility but is intentionally
-    ignored — improved_predict always reads prompts/improved_prompt.txt from disk,
+    ignored: improved_predict always reads prompts/improved_prompt.txt from disk,
     so the caller cannot override the prompt at runtime.
     """
     return improved_predict(image_path)
