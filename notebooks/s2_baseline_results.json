@@ -1,0 +1,812 @@
+[
+    {
+        "image_quality":"good",
+        "predicted_class":"normal",
+        "confidence":0.72,
+        "visual_evidence":[
+            "no synthetic opacity marker detected"
+        ],
+        "justification":"The synthetic image does not contain the opacity marker used by the toy generator. This conclusion is limited to the synthetic validation setting.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":29,
+        "features":{
+            "opacity_peak":3.37,
+            "bright_fraction":0.131,
+            "contrast_std":16.9,
+            "brightness_mean":23.56,
+            "sharpness_lap_var":112.12
+        },
+        "image_name":"CXR_SYN_001_normal.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"suspected_opacity",
+        "confidence":0.78,
+        "visual_evidence":[
+            "synthetic opacity-like area visible in the lung field"
+        ],
+        "justification":"The synthetic image contains a localized brighter region compatible with the toy opacity class. This is a pipeline validation result, not a medical interpretation.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":4.649,
+            "bright_fraction":0.0873,
+            "contrast_std":19.2,
+            "brightness_mean":24.96,
+            "sharpness_lap_var":121.54
+        },
+        "image_name":"CXR_SYN_002_suspected_opacity.png"
+    },
+    {
+        "image_quality":"limited",
+        "predicted_class":"uncertain",
+        "confidence":0.52,
+        "visual_evidence":[
+            "limited synthetic image quality"
+        ],
+        "justification":"The image is treated as limited quality in the toy catalog. The safe output is uncertainty rather than a forced class.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":10,
+        "features":{
+            "opacity_peak":3.375,
+            "bright_fraction":0.1511,
+            "contrast_std":10.55,
+            "brightness_mean":21.0,
+            "sharpness_lap_var":19.1
+        },
+        "image_name":"CXR_SYN_003_uncertain.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"normal",
+        "confidence":0.72,
+        "visual_evidence":[
+            "no synthetic opacity marker detected"
+        ],
+        "justification":"The synthetic image does not contain the opacity marker used by the toy generator. This conclusion is limited to the synthetic validation setting.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":8,
+        "features":{
+            "opacity_peak":3.398,
+            "bright_fraction":0.1323,
+            "contrast_std":16.9,
+            "brightness_mean":23.56,
+            "sharpness_lap_var":112.08
+        },
+        "image_name":"CXR_SYN_004_normal.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"suspected_opacity",
+        "confidence":0.78,
+        "visual_evidence":[
+            "synthetic opacity-like area visible in the lung field"
+        ],
+        "justification":"The synthetic image contains a localized brighter region compatible with the toy opacity class. This is a pipeline validation result, not a medical interpretation.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":4.866,
+            "bright_fraction":0.0966,
+            "contrast_std":19.07,
+            "brightness_mean":24.78,
+            "sharpness_lap_var":118.53
+        },
+        "image_name":"CXR_SYN_005_suspected_opacity.png"
+    },
+    {
+        "image_quality":"limited",
+        "predicted_class":"uncertain",
+        "confidence":0.52,
+        "visual_evidence":[
+            "limited synthetic image quality"
+        ],
+        "justification":"The image is treated as limited quality in the toy catalog. The safe output is uncertainty rather than a forced class.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":8,
+        "features":{
+            "opacity_peak":3.382,
+            "bright_fraction":0.1483,
+            "contrast_std":10.55,
+            "brightness_mean":21.0,
+            "sharpness_lap_var":18.98
+        },
+        "image_name":"CXR_SYN_006_uncertain.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"normal",
+        "confidence":0.72,
+        "visual_evidence":[
+            "no synthetic opacity marker detected"
+        ],
+        "justification":"The synthetic image does not contain the opacity marker used by the toy generator. This conclusion is limited to the synthetic validation setting.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":3.381,
+            "bright_fraction":0.1309,
+            "contrast_std":16.9,
+            "brightness_mean":23.56,
+            "sharpness_lap_var":112.06
+        },
+        "image_name":"CXR_SYN_007_normal.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"suspected_opacity",
+        "confidence":0.78,
+        "visual_evidence":[
+            "synthetic opacity-like area visible in the lung field"
+        ],
+        "justification":"The synthetic image contains a localized brighter region compatible with the toy opacity class. This is a pipeline validation result, not a medical interpretation.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":4.643,
+            "bright_fraction":0.0937,
+            "contrast_std":19.2,
+            "brightness_mean":24.96,
+            "sharpness_lap_var":121.52
+        },
+        "image_name":"CXR_SYN_008_suspected_opacity.png"
+    },
+    {
+        "image_quality":"limited",
+        "predicted_class":"uncertain",
+        "confidence":0.52,
+        "visual_evidence":[
+            "limited synthetic image quality"
+        ],
+        "justification":"The image is treated as limited quality in the toy catalog. The safe output is uncertainty rather than a forced class.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":11,
+        "features":{
+            "opacity_peak":3.394,
+            "bright_fraction":0.15,
+            "contrast_std":10.55,
+            "brightness_mean":21.0,
+            "sharpness_lap_var":19.14
+        },
+        "image_name":"CXR_SYN_009_uncertain.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"normal",
+        "confidence":0.72,
+        "visual_evidence":[
+            "no synthetic opacity marker detected"
+        ],
+        "justification":"The synthetic image does not contain the opacity marker used by the toy generator. This conclusion is limited to the synthetic validation setting.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":3.363,
+            "bright_fraction":0.1311,
+            "contrast_std":16.9,
+            "brightness_mean":23.56,
+            "sharpness_lap_var":111.69
+        },
+        "image_name":"CXR_SYN_010_normal.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"suspected_opacity",
+        "confidence":0.78,
+        "visual_evidence":[
+            "synthetic opacity-like area visible in the lung field"
+        ],
+        "justification":"The synthetic image contains a localized brighter region compatible with the toy opacity class. This is a pipeline validation result, not a medical interpretation.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":4.868,
+            "bright_fraction":0.1029,
+            "contrast_std":19.07,
+            "brightness_mean":24.78,
+            "sharpness_lap_var":118.17
+        },
+        "image_name":"CXR_SYN_011_suspected_opacity.png"
+    },
+    {
+        "image_quality":"limited",
+        "predicted_class":"uncertain",
+        "confidence":0.52,
+        "visual_evidence":[
+            "limited synthetic image quality"
+        ],
+        "justification":"The image is treated as limited quality in the toy catalog. The safe output is uncertainty rather than a forced class.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":9,
+        "features":{
+            "opacity_peak":3.371,
+            "bright_fraction":0.1506,
+            "contrast_std":10.55,
+            "brightness_mean":21.0,
+            "sharpness_lap_var":19.13
+        },
+        "image_name":"CXR_SYN_012_uncertain.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"normal",
+        "confidence":0.72,
+        "visual_evidence":[
+            "no synthetic opacity marker detected"
+        ],
+        "justification":"The synthetic image does not contain the opacity marker used by the toy generator. This conclusion is limited to the synthetic validation setting.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":10,
+        "features":{
+            "opacity_peak":3.377,
+            "bright_fraction":0.1311,
+            "contrast_std":16.9,
+            "brightness_mean":23.56,
+            "sharpness_lap_var":111.63
+        },
+        "image_name":"CXR_SYN_013_normal.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"suspected_opacity",
+        "confidence":0.78,
+        "visual_evidence":[
+            "synthetic opacity-like area visible in the lung field"
+        ],
+        "justification":"The synthetic image contains a localized brighter region compatible with the toy opacity class. This is a pipeline validation result, not a medical interpretation.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":4.635,
+            "bright_fraction":0.0914,
+            "contrast_std":19.2,
+            "brightness_mean":24.96,
+            "sharpness_lap_var":121.6
+        },
+        "image_name":"CXR_SYN_014_suspected_opacity.png"
+    },
+    {
+        "image_quality":"limited",
+        "predicted_class":"uncertain",
+        "confidence":0.52,
+        "visual_evidence":[
+            "limited synthetic image quality"
+        ],
+        "justification":"The image is treated as limited quality in the toy catalog. The safe output is uncertainty rather than a forced class.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":6,
+        "features":{
+            "opacity_peak":3.39,
+            "bright_fraction":0.1507,
+            "contrast_std":10.55,
+            "brightness_mean":21.0,
+            "sharpness_lap_var":19.02
+        },
+        "image_name":"CXR_SYN_015_uncertain.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"normal",
+        "confidence":0.72,
+        "visual_evidence":[
+            "no synthetic opacity marker detected"
+        ],
+        "justification":"The synthetic image does not contain the opacity marker used by the toy generator. This conclusion is limited to the synthetic validation setting.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":3.381,
+            "bright_fraction":0.1325,
+            "contrast_std":16.9,
+            "brightness_mean":23.56,
+            "sharpness_lap_var":112.2
+        },
+        "image_name":"CXR_SYN_016_normal.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"suspected_opacity",
+        "confidence":0.78,
+        "visual_evidence":[
+            "synthetic opacity-like area visible in the lung field"
+        ],
+        "justification":"The synthetic image contains a localized brighter region compatible with the toy opacity class. This is a pipeline validation result, not a medical interpretation.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":4.883,
+            "bright_fraction":0.1025,
+            "contrast_std":19.08,
+            "brightness_mean":24.78,
+            "sharpness_lap_var":118.92
+        },
+        "image_name":"CXR_SYN_017_suspected_opacity.png"
+    },
+    {
+        "image_quality":"limited",
+        "predicted_class":"uncertain",
+        "confidence":0.52,
+        "visual_evidence":[
+            "limited synthetic image quality"
+        ],
+        "justification":"The image is treated as limited quality in the toy catalog. The safe output is uncertainty rather than a forced class.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":3.369,
+            "bright_fraction":0.1499,
+            "contrast_std":10.55,
+            "brightness_mean":21.0,
+            "sharpness_lap_var":18.91
+        },
+        "image_name":"CXR_SYN_018_uncertain.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"normal",
+        "confidence":0.72,
+        "visual_evidence":[
+            "no synthetic opacity marker detected"
+        ],
+        "justification":"The synthetic image does not contain the opacity marker used by the toy generator. This conclusion is limited to the synthetic validation setting.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":6,
+        "features":{
+            "opacity_peak":3.377,
+            "bright_fraction":0.1306,
+            "contrast_std":16.9,
+            "brightness_mean":23.56,
+            "sharpness_lap_var":111.82
+        },
+        "image_name":"CXR_SYN_019_normal.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"suspected_opacity",
+        "confidence":0.78,
+        "visual_evidence":[
+            "synthetic opacity-like area visible in the lung field"
+        ],
+        "justification":"The synthetic image contains a localized brighter region compatible with the toy opacity class. This is a pipeline validation result, not a medical interpretation.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":4.656,
+            "bright_fraction":0.0902,
+            "contrast_std":19.2,
+            "brightness_mean":24.96,
+            "sharpness_lap_var":121.53
+        },
+        "image_name":"CXR_SYN_020_suspected_opacity.png"
+    },
+    {
+        "image_quality":"limited",
+        "predicted_class":"uncertain",
+        "confidence":0.52,
+        "visual_evidence":[
+            "limited synthetic image quality"
+        ],
+        "justification":"The image is treated as limited quality in the toy catalog. The safe output is uncertainty rather than a forced class.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":8,
+        "features":{
+            "opacity_peak":3.384,
+            "bright_fraction":0.1511,
+            "contrast_std":10.55,
+            "brightness_mean":21.0,
+            "sharpness_lap_var":18.83
+        },
+        "image_name":"CXR_SYN_021_uncertain.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"normal",
+        "confidence":0.72,
+        "visual_evidence":[
+            "no synthetic opacity marker detected"
+        ],
+        "justification":"The synthetic image does not contain the opacity marker used by the toy generator. This conclusion is limited to the synthetic validation setting.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":3.382,
+            "bright_fraction":0.1312,
+            "contrast_std":16.9,
+            "brightness_mean":23.56,
+            "sharpness_lap_var":111.68
+        },
+        "image_name":"CXR_SYN_022_normal.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"suspected_opacity",
+        "confidence":0.78,
+        "visual_evidence":[
+            "synthetic opacity-like area visible in the lung field"
+        ],
+        "justification":"The synthetic image contains a localized brighter region compatible with the toy opacity class. This is a pipeline validation result, not a medical interpretation.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":8,
+        "features":{
+            "opacity_peak":4.9,
+            "bright_fraction":0.0984,
+            "contrast_std":19.08,
+            "brightness_mean":24.78,
+            "sharpness_lap_var":118.58
+        },
+        "image_name":"CXR_SYN_023_suspected_opacity.png"
+    },
+    {
+        "image_quality":"limited",
+        "predicted_class":"uncertain",
+        "confidence":0.52,
+        "visual_evidence":[
+            "limited synthetic image quality"
+        ],
+        "justification":"The image is treated as limited quality in the toy catalog. The safe output is uncertainty rather than a forced class.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":8,
+        "features":{
+            "opacity_peak":3.4,
+            "bright_fraction":0.1512,
+            "contrast_std":10.55,
+            "brightness_mean":21.01,
+            "sharpness_lap_var":18.95
+        },
+        "image_name":"CXR_SYN_024_uncertain.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"normal",
+        "confidence":0.72,
+        "visual_evidence":[
+            "no synthetic opacity marker detected"
+        ],
+        "justification":"The synthetic image does not contain the opacity marker used by the toy generator. This conclusion is limited to the synthetic validation setting.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":8,
+        "features":{
+            "opacity_peak":3.354,
+            "bright_fraction":0.1313,
+            "contrast_std":16.9,
+            "brightness_mean":23.56,
+            "sharpness_lap_var":112.15
+        },
+        "image_name":"CXR_SYN_025_normal.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"suspected_opacity",
+        "confidence":0.78,
+        "visual_evidence":[
+            "synthetic opacity-like area visible in the lung field"
+        ],
+        "justification":"The synthetic image contains a localized brighter region compatible with the toy opacity class. This is a pipeline validation result, not a medical interpretation.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":4.65,
+            "bright_fraction":0.0966,
+            "contrast_std":19.2,
+            "brightness_mean":24.96,
+            "sharpness_lap_var":121.38
+        },
+        "image_name":"CXR_SYN_026_suspected_opacity.png"
+    },
+    {
+        "image_quality":"limited",
+        "predicted_class":"uncertain",
+        "confidence":0.52,
+        "visual_evidence":[
+            "limited synthetic image quality"
+        ],
+        "justification":"The image is treated as limited quality in the toy catalog. The safe output is uncertainty rather than a forced class.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":3.38,
+            "bright_fraction":0.151,
+            "contrast_std":10.56,
+            "brightness_mean":21.0,
+            "sharpness_lap_var":19.12
+        },
+        "image_name":"CXR_SYN_027_uncertain.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"normal",
+        "confidence":0.72,
+        "visual_evidence":[
+            "no synthetic opacity marker detected"
+        ],
+        "justification":"The synthetic image does not contain the opacity marker used by the toy generator. This conclusion is limited to the synthetic validation setting.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":3.359,
+            "bright_fraction":0.1286,
+            "contrast_std":16.9,
+            "brightness_mean":23.56,
+            "sharpness_lap_var":111.83
+        },
+        "image_name":"CXR_SYN_028_normal.png"
+    },
+    {
+        "image_quality":"good",
+        "predicted_class":"suspected_opacity",
+        "confidence":0.78,
+        "visual_evidence":[
+            "synthetic opacity-like area visible in the lung field"
+        ],
+        "justification":"The synthetic image contains a localized brighter region compatible with the toy opacity class. This is a pipeline validation result, not a medical interpretation.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":4.868,
+            "bright_fraction":0.1034,
+            "contrast_std":19.07,
+            "brightness_mean":24.78,
+            "sharpness_lap_var":118.31
+        },
+        "image_name":"CXR_SYN_029_suspected_opacity.png"
+    },
+    {
+        "image_quality":"limited",
+        "predicted_class":"uncertain",
+        "confidence":0.52,
+        "visual_evidence":[
+            "limited synthetic image quality"
+        ],
+        "justification":"The image is treated as limited quality in the toy catalog. The safe output is uncertainty rather than a forced class.",
+        "limitations":[
+            "synthetic toy image",
+            "no clinical context",
+            "not a validated medical model",
+            "medgemma_disabled (set USE_MEDGEMMA=1 to enable the VLM)"
+        ],
+        "warning":"Prototype p\u00e9dagogique. Non destin\u00e9 au diagnostic. Validation par un professionnel qualifi\u00e9 requise.",
+        "model_name":"rule-baseline-v1-fallback",
+        "prompt_version":"baseline_v1",
+        "latency_ms":7,
+        "features":{
+            "opacity_peak":3.398,
+            "bright_fraction":0.1507,
+            "contrast_std":10.55,
+            "brightness_mean":21.0,
+            "sharpness_lap_var":19.07
+        },
+        "image_name":"CXR_SYN_030_uncertain.png"
+    }
+]
