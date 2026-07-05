@@ -14,7 +14,7 @@ Les 3 classes possibles :
 Deux sources :
 
 - **Sans préfixe `rsna_`** : images synthétiques (copiées de `data/sample_images/`),
-  à utiliser avec la configuration **Toy** — fonctionne sans GPU.
+  à utiliser avec la configuration **Toy**: fonctionne sans GPU.
 - **Préfixe `rsna_`** : vraies radiographies du challenge RSNA Pneumonia
   (copiées de `data/rsna_images/`), pertinentes pour les configurations
   **MedGemma**. RSNA ne fournit que `normal` et `suspected_opacity`.

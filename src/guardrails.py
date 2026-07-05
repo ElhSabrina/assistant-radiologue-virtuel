@@ -61,7 +61,7 @@ def apply_safety_guardrails(
     When ``screening`` is True (high-sensitivity mode), an ``uncertain`` outcome is
     escalated to ``suspected_opacity``: in a screening setting a doubtful image is
     flagged for review, never left cleared. This trades specificity for a lower
-    false-negative rate — the medically cautious direction.
+    false-negative rate: the medically cautious direction.
     """
     valid, errors = validate_prediction(pred)
     if not valid:

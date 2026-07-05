@@ -1,4 +1,4 @@
-# 06 — L'API et Python : comment parler au système
+# 06: L'API et Python : comment parler au système
 
 ## C'est quoi une API ?
 

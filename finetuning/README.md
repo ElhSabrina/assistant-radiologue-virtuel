@@ -9,11 +9,11 @@ GTX 1660 (6 Go, Turing, pas de bf16 natif) est trop juste pour entraîner un mod
 
 ## Fichiers
 
-- `build_training_data.py` — génère les paires image→JSON (`data/train.jsonl`,
+- `build_training_data.py`: génère les paires image→JSON (`data/train.jsonl`,
   `data/val.jsonl`) depuis le RSNA local, pour inspection. La même logique de
   cibles est reprise dans le notebook.
-- `medgemma_qlora_kaggle.ipynb` — **notebook d'entraînement** à lancer sur Kaggle.
-- `adapter/` — (à créer) où tu décompresses l'adaptateur entraîné.
+- `medgemma_qlora_kaggle.ipynb`: **notebook d'entraînement** à lancer sur Kaggle.
+- `adapter/`: (à créer) où tu décompresses l'adaptateur entraîné.
 
 ## Étapes
 

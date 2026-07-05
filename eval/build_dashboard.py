@@ -62,14 +62,14 @@ def build(summary_csv: Path, out_png: Path, out_md: Path) -> None:
     ax.set_ylim(0, 1.15)
     ax.set_ylabel("Score")
     engine = summary[modes[0]].get("engine", "")
-    ax.set_title(f"Baseline vs Improved — moteur: {engine}")
+    ax.set_title(f"Baseline vs Improved: moteur: {engine}")
     ax.legend()
     ax.grid(axis="y", alpha=0.3)
     fig.tight_layout()
     fig.savefig(out_png, dpi=130)
     plt.close(fig)
 
-    lines = ["# Dashboard — baseline vs improved", "", f"Moteur : `{engine}`", "",
+    lines = ["# Dashboard: baseline vs improved", "", f"Moteur : `{engine}`", "",
              "| Métrique | " + " | ".join(modes) + " | Δ (imp-base) |", "|---|" + "---|" * (len(modes) + 1)]
     for key, lbl in METRICS + [("mean_latency_ms", "Latence moy. (ms)"), ("n", "N")]:
         cells = [summary[m].get(key, "") for m in modes]

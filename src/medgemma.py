@@ -60,7 +60,7 @@ def _adapter_path() -> str | None:
     """Path to a trained LoRA adapter.
 
     Uses ``MEDGEMMA_ADAPTER`` if set, otherwise auto-detects the repo's
-    ``finetuning/adapter/`` when it holds a valid adapter — so the fine-tuned
+    ``finetuning/adapter/`` when it holds a valid adapter: so the fine-tuned
     ("improved") model works with no environment variable to set.
     """
     import os

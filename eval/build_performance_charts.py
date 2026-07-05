@@ -137,7 +137,7 @@ def plot_latency(rows, ax) -> None:
     ax.set_xlabel("latence (s)"); ax.set_ylabel("nombre de cas")
     title = f"Latence (médiane {median:.0f} s)"
     if n_out:
-        title += f" — {n_out} outlier(s) masqué(s)"
+        title += f": {n_out} outlier(s) masqué(s)"
     ax.set_title(title)
 
 
@@ -152,7 +152,7 @@ def build(predictions: Path, out_dir: Path) -> None:
     plot_risk_coverage(rows, axes[1, 0])
     plot_calibration(rows, axes[1, 1])
     plot_latency(rows, axes[1, 2])
-    fig.suptitle(f"MedGemma zero-shot — performances ({len(rows)} cas RSNA)", fontsize=14)
+    fig.suptitle(f"MedGemma zero-shot: performances ({len(rows)} cas RSNA)", fontsize=14)
     fig.tight_layout(rect=(0, 0, 1, 0.97))
     combined = out_dir / "performance_overview.png"
     fig.savefig(combined, dpi=130)

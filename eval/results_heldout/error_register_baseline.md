@@ -1,4 +1,4 @@
-# Registre d'erreurs — baseline_predictions.csv
+# Registre d'erreurs: baseline_predictions.csv
 
 Total : 80 cas.
 
@@ -6,11 +6,11 @@ Total : 80 cas.
 
 | Type | Nombre |
 |---|---|
-| TP — opacity correctly flagged | 35 |
-| TN — normal correctly cleared | 35 |
-| FP — normal image overcalled as opacity | 2 |
-| FN — opacity missed and called normal | 2 |
-| UA — model abstained (uncertain) instead of forcing a class | 6 |
+| TP: opacity correctly flagged | 35 |
+| TN: normal correctly cleared | 35 |
+| FP: normal image overcalled as opacity | 2 |
+| FN: opacity missed and called normal | 2 |
+| UA: model abstained (uncertain) instead of forcing a class | 6 |
 
 ## Cas commentés
 

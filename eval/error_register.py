@@ -94,7 +94,7 @@ def build(predictions: Path, out_csv: Path, out_md: Path) -> None:
         counts[r["error_type"]] = counts.get(r["error_type"], 0) + 1
 
     lines = [
-        f"# Registre d'erreurs — {predictions.name}",
+        f"# Registre d'erreurs: {predictions.name}",
         "",
         f"Total : {len(records)} cas.",
         "",
@@ -105,7 +105,7 @@ def build(predictions: Path, out_csv: Path, out_md: Path) -> None:
     ]
     for etype in ("TP", "TN", "FP", "FN", "UA", "HALLU", "FORMAT"):
         if etype in counts:
-            lines.append(f"| {etype} — {COMMENTS[etype]} | {counts[etype]} |")
+            lines.append(f"| {etype}: {COMMENTS[etype]} | {counts[etype]} |")
     lines += ["", "## Cas commentés", "", "| case_id | vérité | prédiction | conf. | type | sévérité | commentaire |", "|---|---|---|---|---|---|---|"]
     for r in records:
         lines.append(

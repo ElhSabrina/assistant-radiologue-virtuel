@@ -1,4 +1,4 @@
-# Registre d'erreurs — improved_predictions.csv
+# Registre d'erreurs: improved_predictions.csv
 
 Total : 30 cas.
 
@@ -6,10 +6,10 @@ Total : 30 cas.
 
 | Type | Nombre |
 |---|---|
-| TP — opacity correctly flagged | 10 |
-| TN — normal correctly cleared | 15 |
-| FN — opacity missed and called normal | 2 |
-| UA — model abstained (uncertain) instead of forcing a class | 3 |
+| TP: opacity correctly flagged | 10 |
+| TN: normal correctly cleared | 15 |
+| FN: opacity missed and called normal | 2 |
+| UA: model abstained (uncertain) instead of forcing a class | 3 |
 
 ## Cas commentés
 

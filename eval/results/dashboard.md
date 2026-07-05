@@ -1,4 +1,4 @@
-# Dashboard — baseline vs improved
+# Dashboard: baseline vs improved
 
 Moteur : `medgemma`
 

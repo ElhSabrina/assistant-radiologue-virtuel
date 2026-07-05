@@ -45,11 +45,11 @@ streamlit run app/streamlit_app.py
 ```
 
 L'application s'ouvre dans le navigateur. La configuration **Toy** (menu
-« Configuration ») fonctionne **immédiatement**, sans GPU ni téléchargement — c'est
+« Configuration ») fonctionne **immédiatement**, sans GPU ni téléchargement: c'est
 le mode à utiliser pour une démo qui marche à coup sûr.
 
 Les configurations **MedGemma** (baseline et improved) nécessitent en plus : un GPU
-NVIDIA, une build CUDA de PyTorch, et l'accès au modèle MedGemma — voir la section
+NVIDIA, une build CUDA de PyTorch, et l'accès au modèle MedGemma: voir la section
 [Extension MedGemma + RSNA](#extension-medgemma--rsna). La config *improved* utilise
 l'adaptateur fine-tuné s'il est présent dans `finetuning/adapter/` (non versionné :
 à copier depuis Kaggle, cf. [finetuning/README.md](finetuning/README.md)).
@@ -111,7 +111,7 @@ committée.
 L'application propose trois configurations : **Toy** (règles instantanées),
 **MedGemma baseline** (modèle de base + prompt de base) et **MedGemma improved**
 (modèle **fine-tuné LoRA** + prompt renforcé). L'*improved* charge l'adaptateur
-placé dans `finetuning/adapter/` (variable `MEDGEMMA_ADAPTER`) — voir
+placé dans `finetuning/adapter/` (variable `MEDGEMMA_ADAPTER`): voir
 [finetuning/README.md](finetuning/README.md).
 
 ## Organisation
@@ -321,7 +321,7 @@ Le niveau Should est le niveau recommandé pour une bonne soutenance. Il montre 
              │                                         │
              ▼                                         ▼
 ┌──────────────────────────┐              ┌──────────────────────────┐
-│ Version A — Baseline      │              │ Version B — Améliorée     │
+│ Version A: Baseline      │              │ Version B: Améliorée     │
 │ prompt simple             │              │ prompt renforcé           │
 │ sortie JSON               │              │ garde-fous                │
 │ warning obligatoire       │              │ ensemble de prompts       │

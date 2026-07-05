@@ -1,4 +1,4 @@
-# Mini-rapport — Assistant radiologue virtuel (MedGemma + RSNA)
+# Mini-rapport: Assistant radiologue virtuel (MedGemma + RSNA)
 
 > Prototype pédagogique. Non destiné au diagnostic. Validation par un professionnel qualifié requise.
 
@@ -14,14 +14,13 @@ Le projet **ne vise pas le diagnostic** : il démontre une démarche d'ingénier
 responsable (baseline, amélioration mesurée, métriques, logs, analyse d'erreurs,
 limites).
 
-## 2. Données — RSNA Pneumonia Detection Challenge
+## 2. Données: RSNA Pneumonia Detection Challenge
 
 - **Source :** Kaggle, `rsna-pneumonia-detection-challenge` (R5/R7 de l'appel d'offre).
 - **Licence / accès :** données sous conditions de la compétition Kaggle,
   **non redistribuables**. Le dépôt ne contient aucun DICOM ni aucune donnée
   patient ; les images restent locales (`data/rsna_pneumonia/`, gitignoré).
-- **Vérité terrain :** colonne `class` des métadonnées RSNA —
-  `Normal → normal`, `Lung Opacity → suspected_opacity`. La classe ambiguë
+- **Vérité terrain :** colonne `class` des métadonnées RSNA: `Normal → normal`, `Lung Opacity → suspected_opacity`. La classe ambiguë
   « No Lung Opacity / Not Normal » est écartée de la vérité terrain.
 - **Échantillon :** 30 cas équilibrés (15 `normal` / 15 `suspected_opacity`),
   images PNG 512×512, sélection déterministe (seed 42). Décrit dans
@@ -84,7 +83,7 @@ car ses réponses sont plus courtes et mieux cadrées.
 **Décision.** Pour ce prototype, la baseline offre le meilleur équilibre
 sensibilité/spécificité. L'*improved* illustre un arbitrage explicite en faveur de
 la prudence : à conserver seulement si le coût d'un faux positif domine celui d'un
-faux négatif — ce qui, en dépistage d'opacité, est rarement le cas. C'est
+faux négatif: ce qui, en dépistage d'opacité, est rarement le cas. C'est
 précisément le type de compromis à défendre en soutenance plutôt qu'à masquer.
 
 > Nuance métrique : la macro-F1 est calculée sur 3 classes alors que la vérité
@@ -136,7 +135,7 @@ donnait un fine-tuning à 100 % (accuracy/sensibilité/spécificité). Mais l'é
 était petit et **1 des 30 cas figurait dans l'entraînement** : score optimiste, à ne
 pas présenter comme définitif.
 
-**b) Résultat de référence — 80 cas tenus à part, ZÉRO fuite.** Jeu construit par
+**b) Résultat de référence: 80 cas tenus à part, ZÉRO fuite.** Jeu construit par
 `eval/build_heldout_cases.py` en excluant les 400 patientId d'entraînement (40 normal
 / 40 opacité). Comparaison `baseline` (MedGemma de base) vs `improved` (fine-tuné LoRA
 + prompt renforcé). Graphiques : `eval/results_heldout/`.
@@ -158,7 +157,7 @@ Répartition des erreurs (registres `eval/results_heldout/error_register_*.md`) 
 | baseline | 35 | 35 | 2 | **2** | 6 |
 | improved | 30 | 40 | **0** | **10** | 0 |
 
-**Lecture honnête — le fine-tuning n'améliore PAS l'accuracy sur données propres.**
+**Lecture honnête: le fine-tuning n'améliore PAS l'accuracy sur données propres.**
 Les deux versions sont à **0,875**. Le *improved* déplace seulement le point de
 fonctionnement : **spécificité parfaite** (0 faux positif sur les normaux) au prix
 d'une **sensibilité plus basse** (0,75) et surtout de **10 faux négatifs** contre 2
@@ -205,10 +204,10 @@ Répartition observée :
 Cas notables (*improved*) :
 
 - **RSNA_018** (FN, confiance 0,95) : opacité appelée `normal` avec forte
-  confiance — l'erreur la plus dangereuse ici, une confiance élevée mal placée
+  confiance: l'erreur la plus dangereuse ici, une confiance élevée mal placée
   que la calibration ne rattrape pas.
 - **RSNA_010 / 014 / 021** (UA) : le modèle signale une qualité limitée (ligne
-  centrale, trachéotomie, cliché portable AP) et s'abstient — abstention légitime,
+  centrale, trachéotomie, cliché portable AP) et s'abstient: abstention légitime,
   et les dispositifs mentionnés sont réellement visibles (pas d'hallucination).
 
 ## 7. Limites

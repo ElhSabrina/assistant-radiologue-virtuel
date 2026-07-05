@@ -403,7 +403,7 @@ if image_to_process:
                 f"❌ **Échec de l'inférence** ({engine} / {mode_key}) : `{type(exc).__name__}`.\n\n"
                 "Les configurations MedGemma requièrent un GPU NVIDIA, une build CUDA de "
                 "PyTorch et l'accès au modèle (`huggingface-cli login`). La configuration "
-                "**Démonstration** fonctionne sans GPU — utilise-la pour une démo qui marche à coup sûr."
+                "**Démonstration** fonctionne sans GPU: utilise-la pour une démo qui marche à coup sûr."
             )
             st.stop()
             

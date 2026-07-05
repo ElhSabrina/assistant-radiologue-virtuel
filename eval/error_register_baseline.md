@@ -1,4 +1,4 @@
-# Registre d'erreurs — baseline_predictions.csv
+# Registre d'erreurs: baseline_predictions.csv
 
 Total : 30 cas.
 
@@ -6,9 +6,9 @@ Total : 30 cas.
 
 | Type | Nombre |
 |---|---|
-| TP — opacity correctly flagged | 14 |
-| TN — normal correctly cleared | 14 |
-| UA — model abstained (uncertain) instead of forcing a class | 2 |
+| TP: opacity correctly flagged | 14 |
+| TN: normal correctly cleared | 14 |
+| UA: model abstained (uncertain) instead of forcing a class | 2 |
 
 ## Cas commentés
 

@@ -12,10 +12,10 @@ from src.pipeline import predict
 
 # Trois configurations : jouet instantané, MedGemma de base, MedGemma fine-tuné.
 CONFIGS = {
-    "Toy — règles instantanées": ("toy", "baseline"),
-    "MedGemma baseline — base + prompt de base": ("medgemma", "baseline"),
-    "MedGemma improved — fine-tuné (LoRA) + prompt renforcé": ("medgemma", "improved"),
-    "MedGemma dépistage — haute sensibilité (min. faux négatifs)": ("medgemma", "screening"),
+    "Toy: règles instantanées": ("toy", "baseline"),
+    "MedGemma baseline: base + prompt de base": ("medgemma", "baseline"),
+    "MedGemma improved: fine-tuné (LoRA) + prompt renforcé": ("medgemma", "improved"),
+    "MedGemma dépistage: haute sensibilité (min. faux négatifs)": ("medgemma", "screening"),
 }
 
 
@@ -30,10 +30,10 @@ demo = gr.Interface(
     fn=analyze,
     inputs=[
         gr.Image(type="filepath", label="Radiographie thoracique"),
-        gr.Radio(list(CONFIGS), value="Toy — règles instantanées", label="Configuration"),
+        gr.Radio(list(CONFIGS), value="Toy: règles instantanées", label="Configuration"),
     ],
     outputs=gr.JSON(label="Sortie structurée"),
-    title="Assistant radiologue virtuel — prototype pédagogique",
+    title="Assistant radiologue virtuel: prototype pédagogique",
     description="Non destiné au diagnostic. Validation par un professionnel qualifié requise.",
 )
 

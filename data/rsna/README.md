@@ -1,4 +1,4 @@
-# RSNA Pneumonia Detection 2018 — dataset setup
+# RSNA Pneumonia Detection 2018: dataset setup
 
 This directory is the target for the preprocessed RSNA dataset.  
 The raw DICOM files are **not** committed to the repository (too large, licence restrictions).

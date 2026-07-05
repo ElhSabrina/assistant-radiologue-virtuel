@@ -1,4 +1,4 @@
-# Registre d'erreurs — improved_predictions.csv
+# Registre d'erreurs: improved_predictions.csv
 
 Total : 80 cas.
 
@@ -6,9 +6,9 @@ Total : 80 cas.
 
 | Type | Nombre |
 |---|---|
-| TP — opacity correctly flagged | 30 |
-| TN — normal correctly cleared | 40 |
-| FN — opacity missed and called normal | 10 |
+| TP: opacity correctly flagged | 30 |
+| TN: normal correctly cleared | 40 |
+| FN: opacity missed and called normal | 10 |
 
 ## Cas commentés
 
